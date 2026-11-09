@@ -56,8 +56,8 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
           
-          {/* Left menu items: "The watch", "Process", "Fittings" */}
-          <nav className="hidden md:flex items-center space-x-10 text-[11px] uppercase tracking-[0.25em] text-zinc-300 font-medium">
+          {/* Left menu items: "The watch", "Process", "Fittings", "Order Form" */}
+          <nav className="hidden md:flex items-center space-x-8 text-[11px] uppercase tracking-[0.25em] text-zinc-300 font-medium">
             <button
               onClick={() => scrollToSection("product-breakdown")}
               className="hover:text-white transition-colors duration-200 cursor-pointer"
@@ -75,6 +75,13 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
               className="hover:text-white transition-colors duration-200 cursor-pointer"
             >
               Fittings
+            </button>
+            <button
+              onClick={() => scrollToSection("order-section")}
+              className="text-white hover:text-zinc-300 font-semibold transition-colors duration-200 cursor-pointer flex items-center space-x-1.5"
+            >
+              <span>Order Form</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
             </button>
           </nav>
 
@@ -114,10 +121,10 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
             </button>
 
             <button
-              onClick={onOpenBooking}
+              onClick={() => scrollToSection("order-section")}
               className="rounded-full px-5 py-2 text-[11px] uppercase tracking-[0.22em] font-medium text-white border border-white/20 bg-white/[0.04] backdrop-blur-sm hover:bg-white hover:text-black transition-all duration-300 cursor-pointer shadow-sm hover:border-white"
             >
-              Book a fitting
+              Order Now · €9,800
             </button>
           </div>
 
@@ -144,6 +151,13 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
                 className="text-left hover:text-white py-1 transition-colors"
               >
                 Fittings
+              </button>
+              <button
+                onClick={() => scrollToSection("order-section")}
+                className="text-left text-white font-medium py-1 transition-colors flex items-center space-x-2"
+              >
+                <span>Order Form</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               </button>
               <div className="pt-4 border-t border-white/10 flex justify-between items-center text-[10px] text-zinc-400">
                 <span>Sound Ambience</span>

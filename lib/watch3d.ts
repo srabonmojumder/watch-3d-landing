@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
-export type DialType = "blue" | "silver" | "slate";
-export type StrapType = "cognac" | "blue" | "steel";
+export type DialType = "blue" | "silver" | "slate" | "salmon" | "noir";
+export type StrapType = "cognac" | "blue" | "steel" | "black";
 
 export interface Watch3DComponents {
   root: THREE.Group;
@@ -82,6 +82,53 @@ function createDialTexture(dialType: DialType): THREE.CanvasTexture {
       ctx.lineTo(x, size);
       ctx.stroke();
     }
+  } else if (dialType === "salmon") {
+    // Parisian Saumon Vendôme sunburst
+    ctx.fillStyle = "#a84e36";
+    ctx.fillRect(0, 0, size, size);
+
+    const grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, r);
+    grad.addColorStop(0, "#fbc3b5");
+    grad.addColorStop(0.35, "#f69d80");
+    grad.addColorStop(0.75, "#d96243");
+    grad.addColorStop(1, "#7c2815");
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 90 delicate sunburst rays
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.16)";
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 90; i++) {
+      const angle = (i * Math.PI) / 45;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r);
+      ctx.stroke();
+    }
+  } else if (dialType === "noir") {
+    // Obsidian deep galvanic black
+    ctx.fillStyle = "#050505";
+    ctx.fillRect(0, 0, size, size);
+
+    const grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, r);
+    grad.addColorStop(0, "#27272a");
+    grad.addColorStop(0.5, "#141416");
+    grad.addColorStop(1, "#030304");
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Fine concentric circular record-groove grain
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+    ctx.lineWidth = 1;
+    for (let cr = r * 0.15; cr < r * 0.95; cr += 10) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, cr, 0, Math.PI * 2);
+      ctx.stroke();
+    }
   } else {
     // Slate Ardoise guilloché
     ctx.fillStyle = "#18181b";
@@ -143,6 +190,12 @@ function createDialTexture(dialType: DialType): THREE.CanvasTexture {
   } else if (dialType === "silver") {
     subGrad.addColorStop(0, "#e2e8f0");
     subGrad.addColorStop(1, "#94a3b8");
+  } else if (dialType === "salmon") {
+    subGrad.addColorStop(0, "#f89e83");
+    subGrad.addColorStop(1, "#8e321a");
+  } else if (dialType === "noir") {
+    subGrad.addColorStop(0, "#27272a");
+    subGrad.addColorStop(1, "#09090b");
   } else {
     subGrad.addColorStop(0, "#09090b");
     subGrad.addColorStop(1, "#18181b");
@@ -313,7 +366,10 @@ function createLeatherTexture(colorHex: string): THREE.CanvasTexture {
   return texture;
 }
 
-export function build3DWatch(): Watch3DComponents {
+export function build3DWatch(
+  initialDial: DialType = "blue",
+  initialStrap: StrapType = "cognac"
+): Watch3DComponents {
   const root = new THREE.Group();
 
   // -------------------------------------------------------------
@@ -400,7 +456,7 @@ export function build3DWatch(): Watch3DComponents {
   // -------------------------------------------------------------
   // 3. DIAL & SAPPHIRE CRYSTAL (Facing +Z directly toward camera)
   // -------------------------------------------------------------
-  let currentDialTexture = createDialTexture("blue");
+  let currentDialTexture = createDialTexture(initialDial);
   const dialMaterial = new THREE.MeshStandardMaterial({
     map: currentDialTexture,
     roughness: 0.55,
@@ -555,6 +611,13 @@ export function build3DWatch(): Watch3DComponents {
         roughness: 0.75,
         metalness: 0.1,
       });
+    } else if (type === "black") {
+      const tex = createLeatherTexture("#18181b");
+      currentStrapMat = new THREE.MeshStandardMaterial({
+        map: tex,
+        roughness: 0.75,
+        metalness: 0.1,
+      });
     } else {
       // Milanese 316L Stainless Steel Mesh
       currentStrapMat = new THREE.MeshStandardMaterial({
@@ -587,7 +650,7 @@ export function build3DWatch(): Watch3DComponents {
     strapGroup.add(buckleMesh);
   };
 
-  buildStrapMeshes("cognac");
+  buildStrapMeshes(initialStrap);
 
   // Dynamic Dial Switcher
   const updateDial = (dial: DialType) => {

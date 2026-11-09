@@ -8,6 +8,7 @@ import { ProductBreakdown } from "@/components/ProductBreakdown";
 import { WatchRollShowcase } from "@/components/WatchRollShowcase";
 import { MovementSection } from "@/components/MovementSection";
 import { ProvenanceSection } from "@/components/ProvenanceSection";
+import { OrderSection } from "@/components/OrderSection";
 import { Footer } from "@/components/Footer";
 import { FittingModal } from "@/components/FittingModal";
 
@@ -17,7 +18,12 @@ export default function Home() {
 
   const handleOpenBooking = (dialName: string = "BLUE") => {
     setSelectedDialForBooking(dialName);
-    setBookingOpen(true);
+    const element = document.getElementById("order-section");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    } else {
+      setBookingOpen(true);
+    }
   };
 
   return (
@@ -42,6 +48,21 @@ export default function Home() {
 
         {/* Provenance: Place Vendôme Paris Atelier */}
         <ProvenanceSection />
+
+        {/* Dedicated 3D Configurator & Private Order Section */}
+        <OrderSection
+          initialDial={
+            selectedDialForBooking.toLowerCase() === "silver"
+              ? "silver"
+              : selectedDialForBooking.toLowerCase() === "slate"
+              ? "slate"
+              : selectedDialForBooking.toLowerCase() === "salmon"
+              ? "salmon"
+              : selectedDialForBooking.toLowerCase() === "noir"
+              ? "noir"
+              : "blue"
+          }
+        />
 
         {/* Luxury Haute Horlogerie Footer */}
         <Footer />
