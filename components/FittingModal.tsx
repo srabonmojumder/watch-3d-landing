@@ -3,17 +3,7 @@
 import React, { useState } from "react";
 import confetti from "canvas-confetti";
 import { soundManager } from "@/lib/audio";
-import {
-  X,
-  MapPin,
-  Calendar,
-  Clock,
-  Wine,
-  Sparkles,
-  Check,
-  ShieldCheck,
-  Award,
-} from "lucide-react";
+import { X, Check } from "lucide-react";
 
 interface FittingModalProps {
   isOpen: boolean;
@@ -91,12 +81,12 @@ export function FittingModal({
     setBookingRef(ref);
     setIsSubmitted(true);
 
-    // Luxury celebratory confetti
+    // Monochromatic & platinum celebratory confetti
     confetti({
-      particleCount: 80,
-      spread: 70,
+      particleCount: 75,
+      spread: 65,
       origin: { y: 0.6 },
-      colors: ["#d4af37", "#f3e5ab", "#ffffff", "#1e3a8a"],
+      colors: ["#ffffff", "#cbd5e1", "#94a3b8", "#1e3a8a"],
     });
   };
 
@@ -109,23 +99,23 @@ export function FittingModal({
   const salonObj = SALONS.find((s) => s.id === selectedSalon) || SALONS[0];
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-xl flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
-      <div className="relative w-full max-w-2xl bg-[#0f1115] border border-white/20 shadow-[0_25px_80px_rgba(0,0,0,0.95)] overflow-hidden my-8">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-2xl flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
+      <div className="relative w-full max-w-2xl bg-[#090909] border border-white/15 shadow-[0_30px_90px_rgba(0,0,0,1)] overflow-hidden my-8">
         
         {/* Modal Top Bar */}
         <div className="flex items-center justify-between px-8 py-5 border-b border-white/10 bg-white/[0.02]">
           <div className="flex items-center space-x-3">
-            <span className="w-2 h-2 rounded-full bg-[#d4af37]" />
-            <span className="font-serif text-lg tracking-[0.2em] text-white uppercase">
+            <span className="w-1.5 h-1.5 rounded-full bg-white" />
+            <span className="font-mono text-xs tracking-[0.25em] text-white uppercase">
               VÉRAN · PRIVATE SALON FITTING
             </span>
           </div>
           <button
             onClick={handleClose}
-            className="text-zinc-400 hover:text-white transition-colors p-1"
-            aria-label="Close booking modal"
+            className="text-zinc-400 hover:text-white transition-colors p-1 cursor-pointer"
+            aria-label="Close modal"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
@@ -134,22 +124,21 @@ export function FittingModal({
           {!isSubmitted ? (
             <form onSubmit={handleSubmit} className="space-y-8">
               
-              {/* Introduction */}
               <div>
-                <span className="text-[10px] uppercase tracking-[0.3em] text-[#d4af37] block mb-1">
+                <span className="text-[10px] uppercase tracking-[0.3em] text-zinc-400 font-mono block mb-1">
                   Complimentary Horological Consultation
                 </span>
-                <h3 className="font-serif text-2xl md:text-3xl font-light text-white uppercase tracking-wide">
+                <h3 className="font-sans text-2xl font-light text-white uppercase tracking-wide">
                   Reserve Your Place
                 </h3>
                 <p className="text-xs text-zinc-400 font-light mt-1">
-                  Experience Le Voyageur on your wrist accompanied by Ruinart champagne and our master horologist.
+                  Experience Le Voyageur accompanied by private salon hospitality and our master watchmaker.
                 </p>
               </div>
 
               {/* 1. Flagship Salon Selector */}
               <div>
-                <label className="block text-[11px] uppercase tracking-[0.2em] text-zinc-300 mb-3">
+                <label className="block text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-300 mb-3">
                   1. Select Flagship Salon
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -160,14 +149,14 @@ export function FittingModal({
                       onClick={() => setSelectedSalon(salon.id)}
                       className={`p-3 text-left border transition-all cursor-pointer ${
                         selectedSalon === salon.id
-                          ? "border-[#d4af37] bg-[#d4af37]/10"
-                          : "border-white/10 hover:border-white/30 bg-black/40"
+                          ? "border-white bg-white/10"
+                          : "border-white/10 hover:border-white/30 bg-black"
                       }`}
                     >
-                      <span className="block font-serif text-sm text-white font-medium">
+                      <span className="block font-sans text-xs text-white uppercase tracking-wider font-medium">
                         {salon.city}
                       </span>
-                      <span className="block text-[9.5px] text-zinc-400 truncate mt-0.5">
+                      <span className="block text-[9px] text-zinc-400 truncate mt-0.5 font-light">
                         {salon.address}
                       </span>
                     </button>
@@ -177,7 +166,7 @@ export function FittingModal({
 
               {/* 2. Dial Preference */}
               <div>
-                <label className="block text-[11px] uppercase tracking-[0.2em] text-zinc-300 mb-3">
+                <label className="block text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-300 mb-3">
                   2. Dial Variant To Present
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -186,10 +175,10 @@ export function FittingModal({
                       key={d}
                       type="button"
                       onClick={() => setSelectedDial(d)}
-                      className={`p-2.5 text-center border text-[11px] uppercase tracking-wider transition-all cursor-pointer ${
+                      className={`p-2.5 text-center border text-[10px] uppercase tracking-wider transition-all cursor-pointer ${
                         selectedDial === d
-                          ? "border-[#d4af37] bg-[#d4af37]/15 text-[#f3e5ab] font-semibold"
-                          : "border-white/10 text-zinc-400 hover:border-white/30 bg-black/40"
+                          ? "border-white bg-white text-black font-semibold"
+                          : "border-white/10 text-zinc-400 hover:border-white/30 bg-black"
                       }`}
                     >
                       {d}
@@ -201,7 +190,7 @@ export function FittingModal({
               {/* 3. Date & Time Selection */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] uppercase tracking-[0.2em] text-zinc-300 mb-2">
+                  <label className="block text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-300 mb-2">
                     Date
                   </label>
                   <input
@@ -209,20 +198,20 @@ export function FittingModal({
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
                     required
-                    className="w-full bg-black/60 border border-white/15 px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#d4af37]"
+                    className="w-full bg-black border border-white/15 px-4 py-2.5 text-xs text-white focus:outline-none focus:border-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] uppercase tracking-[0.2em] text-zinc-300 mb-2">
+                  <label className="block text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-300 mb-2">
                     Time Slot
                   </label>
                   <select
                     value={selectedTime}
                     onChange={(e) => setSelectedTime(e.target.value)}
-                    className="w-full bg-[#111418] border border-white/15 px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#d4af37]"
+                    className="w-full bg-black border border-white/15 px-4 py-2.5 text-xs text-white focus:outline-none focus:border-white"
                   >
                     {TIME_SLOTS.map((t) => (
-                      <option key={t} value={t} className="bg-[#111418] text-white">
+                      <option key={t} value={t} className="bg-black text-white">
                         {t}
                       </option>
                     ))}
@@ -230,9 +219,9 @@ export function FittingModal({
                 </div>
               </div>
 
-              {/* 4. Complimentary Amenities Checkboxes */}
+              {/* 4. Complimentary Amenities */}
               <div className="space-y-3 pt-2">
-                <span className="block text-[11px] uppercase tracking-[0.2em] text-zinc-300">
+                <span className="block text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-300">
                   Salon Hospitality (Complimentary)
                 </span>
                 <label className="flex items-center space-x-3 text-xs text-zinc-300 cursor-pointer">
@@ -240,7 +229,7 @@ export function FittingModal({
                     type="checkbox"
                     checked={champagnePairing}
                     onChange={(e) => setChampagnePairing(e.target.checked)}
-                    className="accent-[#d4af37] w-4 h-4 rounded"
+                    className="accent-white w-4 h-4 rounded"
                   />
                   <span>Ruinart Blanc de Blancs Champagne Service on Arrival</span>
                 </label>
@@ -249,7 +238,7 @@ export function FittingModal({
                     type="checkbox"
                     checked={monogramConsultation}
                     onChange={(e) => setMonogramConsultation(e.target.checked)}
-                    className="accent-[#d4af37] w-4 h-4 rounded"
+                    className="accent-white w-4 h-4 rounded"
                   />
                   <span>Personalized Caseback Monogramming Consultation</span>
                 </label>
@@ -257,7 +246,7 @@ export function FittingModal({
 
               {/* 5. Guest Information */}
               <div className="space-y-4 pt-2">
-                <span className="block text-[11px] uppercase tracking-[0.2em] text-zinc-300">
+                <span className="block text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-300">
                   Guest Information
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -267,7 +256,7 @@ export function FittingModal({
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full bg-black/60 border border-white/15 px-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#d4af37]"
+                    className="w-full bg-black border border-white/15 px-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white"
                   />
                   <input
                     type="email"
@@ -275,7 +264,7 @@ export function FittingModal({
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-black/60 border border-white/15 px-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#d4af37]"
+                    className="w-full bg-black border border-white/15 px-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white"
                   />
                 </div>
                 <input
@@ -284,14 +273,14 @@ export function FittingModal({
                   required
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full bg-black/60 border border-white/15 px-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#d4af37]"
+                  className="w-full bg-black border border-white/15 px-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white"
                 />
                 <textarea
                   placeholder="Special requests or preferred strap sizing..."
                   rows={2}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full bg-black/60 border border-white/15 px-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#d4af37] resize-none"
+                  className="w-full bg-black border border-white/15 px-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white resize-none"
                 />
               </div>
 
@@ -299,28 +288,27 @@ export function FittingModal({
               <div className="pt-4 border-t border-white/10">
                 <button
                   type="submit"
-                  className="w-full py-4 bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#d4af37] text-black font-semibold uppercase tracking-[0.25em] text-xs transition-all duration-300 hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] cursor-pointer"
+                  className="w-full py-4 bg-white hover:bg-zinc-200 text-black font-medium uppercase tracking-[0.25em] text-xs transition-all duration-300 cursor-pointer shadow-lg active:scale-[0.99]"
                 >
                   Confirm Salon Fitting
                 </button>
-                <p className="text-[10px] text-zinc-400 text-center uppercase tracking-widest mt-3">
+                <p className="text-[9px] text-zinc-400 text-center uppercase tracking-widest mt-3 font-mono">
                   No purchase obligation · Private salon room reserved for 90 minutes
                 </p>
               </div>
 
             </form>
           ) : (
-            /* Confirmation Pass */
             <div className="space-y-6 text-center py-6 animate-in zoom-in-95 duration-500">
-              <div className="w-16 h-16 rounded-full bg-[#d4af37]/20 border border-[#d4af37] flex items-center justify-center mx-auto text-[#d4af37]">
-                <Check size={32} />
+              <div className="w-14 h-14 rounded-full bg-white/10 border border-white flex items-center justify-center mx-auto text-white">
+                <Check size={28} />
               </div>
 
               <div>
-                <span className="text-[10px] uppercase tracking-[0.35em] text-[#d4af37] font-semibold block mb-2">
+                <span className="text-[10px] uppercase tracking-[0.35em] text-zinc-400 font-mono block mb-2">
                   CONFIRMATION OF SALON INVITATION
                 </span>
-                <h3 className="font-serif text-3xl text-white font-light mb-2">
+                <h3 className="font-sans text-2xl text-white font-light uppercase tracking-wider mb-2">
                   We Await Your Presence, {fullName || "Cher Invité"}
                 </h3>
                 <p className="text-xs text-zinc-400 font-light max-w-md mx-auto">
@@ -328,41 +316,37 @@ export function FittingModal({
                 </p>
               </div>
 
-              {/* Admission Pass Card */}
-              <div className="bg-[#14171d] border border-white/15 p-6 text-left max-w-md mx-auto relative overflow-hidden shadow-2xl">
-                <div className="absolute top-0 right-0 px-3 py-1 bg-[#d4af37] text-black text-[9px] uppercase tracking-widest font-semibold">
-                  CONFIRMED
-                </div>
-
+              {/* Pass Card */}
+              <div className="bg-[#0f0f0f] border border-white/15 p-6 text-left max-w-md mx-auto relative overflow-hidden shadow-2xl">
                 <div className="space-y-3 text-xs">
                   <div>
-                    <span className="text-[9px] uppercase tracking-widest text-zinc-400 block">
+                    <span className="text-[9px] uppercase tracking-widest text-zinc-400 font-mono block">
                       Invitation Reference
                     </span>
-                    <span className="font-mono text-sm text-[#f3e5ab] font-bold">
+                    <span className="font-mono text-sm text-white font-bold">
                       {bookingRef}
                     </span>
                   </div>
 
                   <div className="pt-2 border-t border-white/10 grid grid-cols-2 gap-4">
                     <div>
-                      <span className="text-[9px] uppercase tracking-widest text-zinc-400 block">
+                      <span className="text-[9px] uppercase tracking-widest text-zinc-400 font-mono block">
                         Location
                       </span>
-                      <span className="text-white font-serif">{salonObj.city} Flagship</span>
+                      <span className="text-white font-sans">{salonObj.city} Flagship</span>
                       <span className="block text-[9px] text-zinc-400">{salonObj.address}</span>
                     </div>
                     <div>
-                      <span className="text-[9px] uppercase tracking-widest text-zinc-400 block">
+                      <span className="text-[9px] uppercase tracking-widest text-zinc-400 font-mono block">
                         Date & Time
                       </span>
-                      <span className="text-white font-serif">{selectedDate}</span>
+                      <span className="text-white font-sans">{selectedDate}</span>
                       <span className="block text-[9px] text-zinc-400">{selectedTime}</span>
                     </div>
                   </div>
 
                   <div className="pt-2 border-t border-white/10">
-                    <span className="text-[9px] uppercase tracking-widest text-zinc-400 block">
+                    <span className="text-[9px] uppercase tracking-widest text-zinc-400 font-mono block">
                       Timepiece To Present
                     </span>
                     <span className="text-white font-medium">
@@ -374,7 +358,7 @@ export function FittingModal({
 
               <button
                 onClick={handleClose}
-                className="px-8 py-3 bg-[#d4af37] text-black font-semibold uppercase tracking-[0.22em] text-xs hover:bg-[#f3e5ab] cursor-pointer"
+                className="px-8 py-3 bg-white text-black font-medium uppercase tracking-[0.22em] text-xs hover:bg-zinc-200 cursor-pointer"
               >
                 Return to Timepiece
               </button>
@@ -386,4 +370,3 @@ export function FittingModal({
     </div>
   );
 }
-

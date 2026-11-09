@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import Lenis from "lenis";
+import Lenis from "@studio-freight/lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -16,18 +16,18 @@ export function SmoothScrollProvider({
     gsap.registerPlugin(ScrollTrigger);
 
     const lenis = new Lenis({
-      duration: 1.25,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      duration: 1.2,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: "vertical",
       gestureOrientation: "vertical",
       smoothWheel: true,
-      wheelMultiplier: 0.9,
+      wheelMultiplier: 0.95,
       touchMultiplier: 1.8,
     });
 
     lenisRef.current = lenis;
 
-    // Synchronize Lenis scroll position with GSAP ScrollTrigger
+    // Synchronize Lenis smooth scrolling with GSAP ScrollTrigger
     lenis.on("scroll", () => {
       ScrollTrigger.update();
     });
@@ -46,6 +46,5 @@ export function SmoothScrollProvider({
     };
   }, []);
 
-  return <div className="w-full relative">{children}</div>;
+  return <div className="w-full relative bg-black text-white">{children}</div>;
 }
-

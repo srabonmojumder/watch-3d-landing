@@ -4,25 +4,26 @@ import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { soundManager } from "@/lib/audio";
-import { ChevronDown, Sparkles, Volume2, ShieldCheck, Compass } from "lucide-react";
 
 export function HeroScrollytelling() {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const subtextRef = useRef<HTMLDivElement>(null);
-  const indicatorRef = useRef<HTMLDivElement>(null);
 
   const [loaded, setLoaded] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
-  const [currentNarrative, setCurrentNarrative] = useState("Arrival at Le Grand Hôtel, Paris");
-  const bellRungRef = useRef(false);
 
-  // Cached frame bitmaps
+  // Micro Telemetry states
+  const [telemetryTime, setTelemetryTime] = useState("00:01");
+  const [telemetryLabel, setTelemetryLabel] = useState("THE FIRST STEPS");
+  const [scrubProgress, setScrubProgress] = useState(0);
+
+  const bellRungRef = useRef(false);
   const framesCacheRef = useRef<HTMLCanvasElement[]>([]);
   const totalFrames = 80;
 
-  // Render a specific frame of the traveler -> hotel desk -> bell -> macro dial journey
+  // Render an individual cinematic frame of the sequence
   const renderFrameToCanvas = (index: number, width: number, height: number): HTMLCanvasElement => {
     const offscreen = document.createElement("canvas");
     offscreen.width = width;
@@ -32,387 +33,468 @@ export function HeroScrollytelling() {
 
     const t = index / (totalFrames - 1); // 0.0 to 1.0
 
-    // Background gradient - luxury moody atmospheric Parisian hotel lighting
+    // Monochromatic dark backdrop with subtle lighting transition
     const bgGrad = ctx.createRadialGradient(
       width * 0.5,
       height * (0.35 + t * 0.15),
       width * 0.05,
       width * 0.5,
       height * 0.5,
-      width * 0.8
+      width * 0.85
     );
 
-    // Warm hotel lighting transitioning to dark macro studio lighting
-    if (t < 0.6) {
-      bgGrad.addColorStop(0, "#2a1e12"); // Amber chandelier glow
-      bgGrad.addColorStop(0.35, "#181310"); // Rich Parisian lobby darkness
-      bgGrad.addColorStop(0.75, "#0d0b0a");
-      bgGrad.addColorStop(1, "#070606");
+    if (t < 0.55) {
+      bgGrad.addColorStop(0, "#1a1612"); // Muted warm architectural glow
+      bgGrad.addColorStop(0.4, "#0d0c0a");
+      bgGrad.addColorStop(1, "#000000");
+    } else if (t < 0.75) {
+      bgGrad.addColorStop(0, "#151820"); // Terrace overcast slate
+      bgGrad.addColorStop(0.5, "#0a0c10");
+      bgGrad.addColorStop(1, "#000000");
     } else {
-      const dialFocus = (t - 0.6) / 0.4;
-      bgGrad.addColorStop(0, `rgba(${Math.round(20 - dialFocus * 10)}, ${Math.round(30 + dialFocus * 10)}, ${Math.round(55 + dialFocus * 25)}, 1)`);
-      bgGrad.addColorStop(0.5, "#0d1117");
-      bgGrad.addColorStop(1, "#07080a");
+      bgGrad.addColorStop(0, "#0c1524"); // Deep sapphire studio vignette
+      bgGrad.addColorStop(0.5, "#080a0f");
+      bgGrad.addColorStop(1, "#000000");
     }
 
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
     // -------------------------------------------------------------
-    // STAGE 1: HOTEL LOBBY ARCHITECTURE & WALKING TRAVELER (t: 0.0 - 0.35)
+    // ACT 1: PARISIAN HOTEL FACADE & SHARP-DRESSED TRAVELER (t: 0.0 - 0.30)
     // -------------------------------------------------------------
-    if (t < 0.65) {
-      const lobbyFade = Math.max(0, 1 - (t - 0.4) / 0.25);
+    if (t < 0.55) {
+      const act1Alpha = Math.max(0, 1 - (t - 0.25) / 0.25);
       ctx.save();
-      ctx.globalAlpha = lobbyFade;
+      ctx.globalAlpha = act1Alpha;
 
-      // Architectural arches & pillars
-      ctx.strokeStyle = "rgba(212, 175, 55, 0.12)";
-      ctx.lineWidth = 2;
-      const colStep = width / 6;
-      for (let i = 1; i <= 5; i++) {
-        const cx = i * colStep;
+      // Classical Parisian Hotel Haussmann facade
+      ctx.fillStyle = "#121110";
+      ctx.fillRect(0, 0, width, height * 0.72);
+
+      // Ashlar limestone grooves
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.03)";
+      ctx.lineWidth = 1;
+      for (let y = height * 0.1; y < height * 0.72; y += 38) {
         ctx.beginPath();
-        ctx.moveTo(cx - 30, height * 0.8);
-        ctx.lineTo(cx - 30, height * 0.18);
-        ctx.bezierCurveTo(cx - 30, height * 0.08, cx + 30, height * 0.08, cx + 30, height * 0.18);
-        ctx.lineTo(cx + 30, height * 0.8);
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
         ctx.stroke();
       }
 
-      // Checkered marble floor perspective
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
-      ctx.fillStyle = "rgba(20, 18, 16, 0.7)";
-      for (let row = 0; row < 12; row++) {
-        const yTop = height * (0.65 + row * 0.03);
-        const yBot = height * (0.65 + (row + 1) * 0.035);
-        for (let col = 0; col < 14; col++) {
-          if ((row + col) % 2 === 0) {
-            ctx.fillStyle = "rgba(255, 255, 255, 0.02)";
-          } else {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
-          }
-          const x1 = (col / 14) * width * 1.4 - width * 0.2;
-          const x2 = ((col + 1) / 14) * width * 1.4 - width * 0.2;
-          ctx.beginPath();
-          ctx.moveTo(x1, yTop);
-          ctx.lineTo(x2, yTop);
-          ctx.lineTo(x2 * 1.05, yBot);
-          ctx.lineTo(x1 * 1.05, yBot);
-          ctx.closePath();
-          ctx.fill();
-        }
-      }
+      // Grand Parisian Arched Carriage Entrance
+      const archW = width * 0.38;
+      const archH = height * 0.58;
+      const archX = width * 0.5 - archW / 2;
+      const archY = height * 0.15;
 
-      // Chandelier golden light rays
-      const chandelierY = height * 0.12;
-      const rayGrad = ctx.createRadialGradient(width * 0.5, chandelierY, 5, width * 0.5, chandelierY + 280, 400);
-      rayGrad.addColorStop(0, "rgba(255, 225, 160, 0.35)");
-      rayGrad.addColorStop(0.5, "rgba(212, 175, 55, 0.08)");
-      rayGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = rayGrad;
+      ctx.fillStyle = "#050505";
       ctx.beginPath();
-      ctx.arc(width * 0.5, chandelierY + 120, 350, 0, Math.PI * 2);
+      ctx.moveTo(archX, archY + archH);
+      ctx.lineTo(archX, archY + archW / 2);
+      ctx.bezierCurveTo(archX, archY, archX + archW, archY, archX + archW, archY + archW / 2);
+      ctx.lineTo(archX + archW, archY + archH);
+      ctx.closePath();
       ctx.fill();
 
-      // Atmospheric dust particles in chandelier light
-      ctx.fillStyle = "rgba(255, 235, 180, 0.4)";
-      for (let p = 0; p < 25; p++) {
-        const px = (Math.sin(p * 99 + index * 0.05) * 0.5 + 0.5) * width;
-        const py = (Math.cos(p * 37 + index * 0.04) * 0.5 + 0.5) * height * 0.6 + height * 0.1;
+      // Warm glow radiating from within hotel entrance
+      const portalGlow = ctx.createRadialGradient(
+        width * 0.5,
+        archY + archH * 0.6,
+        10,
+        width * 0.5,
+        archY + archH * 0.6,
+        archW * 0.7
+      );
+      portalGlow.addColorStop(0, "rgba(225, 185, 120, 0.22)");
+      portalGlow.addColorStop(0.6, "rgba(225, 185, 120, 0.05)");
+      portalGlow.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = portalGlow;
+      ctx.fill();
+
+      // Cobblestone ground
+      ctx.fillStyle = "#090909";
+      ctx.fillRect(0, height * 0.72, width, height * 0.28);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.02)";
+      for (let cy = height * 0.72; cy < height; cy += 16) {
         ctx.beginPath();
-        ctx.arc(px, py, (p % 3) + 0.8, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.moveTo(0, cy);
+        ctx.lineTo(width, cy);
+        ctx.stroke();
       }
 
-      ctx.restore();
-    }
+      // Sharp-dressed traveler walking towards hotel
+      const walkProgress = Math.min(1, t / 0.35);
+      const travelerScale = 0.78 + walkProgress * 0.45;
+      const travelerX = width * (0.38 + walkProgress * 0.12);
+      const travelerY = height * (0.70 + walkProgress * 0.06);
 
-    // -------------------------------------------------------------
-    // STAGE 2 & 3: TRAVELER, LEATHER BAG, RECEPTION DESK & BELL (t: 0.0 - 0.65)
-    // -------------------------------------------------------------
-    if (t < 0.75) {
-      const sceneFade = Math.max(0, 1 - (t - 0.55) / 0.2);
-      ctx.save();
-      ctx.globalAlpha = sceneFade;
-
-      // Traveler walk progression
-      const walkProg = Math.min(1, t / 0.55);
-      const travelerScale = 0.85 + walkProg * 0.55;
-      const travelerX = width * (0.35 + walkProg * 0.15);
-      const travelerY = height * (0.62 + walkProg * 0.08);
-
-      // Traveler silhouette in tailored charcoal coat
       ctx.save();
       ctx.translate(travelerX, travelerY);
       ctx.scale(travelerScale, travelerScale);
 
-      // Shadow on floor
-      ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+      // Traveler floor shadow
+      ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
       ctx.beginPath();
-      ctx.ellipse(0, 15, 90, 22, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 10, 85, 20, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Overcoat silhouette
-      const coatGrad = ctx.createLinearGradient(-40, -220, 60, 0);
-      coatGrad.addColorStop(0, "#1f2228");
-      coatGrad.addColorStop(0.6, "#121417");
-      coatGrad.addColorStop(1, "#0a0b0d");
+      // Tailored Charcoal Overcoat
+      const coatGrad = ctx.createLinearGradient(-40, -200, 40, 0);
+      coatGrad.addColorStop(0, "#1c1e22");
+      coatGrad.addColorStop(0.6, "#111316");
+      coatGrad.addColorStop(1, "#090a0d");
       ctx.fillStyle = coatGrad;
-
-      // Torso & overcoat body
       ctx.beginPath();
-      ctx.moveTo(-35, -160);
-      ctx.bezierCurveTo(-45, -120, -50, -40, -55, 0);
-      ctx.lineTo(45, 0);
-      ctx.bezierCurveTo(40, -40, 35, -120, 25, -160);
+      ctx.moveTo(-32, -150);
+      ctx.bezierCurveTo(-40, -110, -48, -40, -50, 0);
+      ctx.lineTo(40, 0);
+      ctx.bezierCurveTo(36, -40, 32, -110, 24, -150);
       ctx.closePath();
       ctx.fill();
 
-      // High collar & lapel
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
-      ctx.lineWidth = 1.5;
+      // Head silhouette
+      ctx.fillStyle = "#14161a";
       ctx.beginPath();
-      ctx.moveTo(-15, -165);
-      ctx.lineTo(-5, -110);
-      ctx.lineTo(10, -165);
-      ctx.stroke();
-
-      // Head / refined profile
-      ctx.fillStyle = "#16181d";
-      ctx.beginPath();
-      ctx.arc(-5, -190, 24, 0, Math.PI * 2);
+      ctx.arc(-4, -180, 22, 0, Math.PI * 2);
       ctx.fill();
 
-      // Vintage cognac leather weekend bag (heritage duffle)
+      // Luxury Patina Leather Weekend Bag in Hand
       ctx.save();
-      const bagX = -65;
-      const bagY = -40;
-      ctx.translate(bagX, bagY);
+      ctx.translate(-58, -35);
 
-      // Bag leather body
-      const leatherGrad = ctx.createLinearGradient(-35, -25, 35, 25);
-      leatherGrad.addColorStop(0, "#8a481e");
-      leatherGrad.addColorStop(0.5, "#663412");
-      leatherGrad.addColorStop(1, "#3f1c07");
-      ctx.fillStyle = leatherGrad;
-
-      // Barrel bag shape
+      const bagGrad = ctx.createLinearGradient(-35, -20, 35, 20);
+      bagGrad.addColorStop(0, "#733d1b"); // Rich cognac patina
+      bagGrad.addColorStop(0.4, "#542a10");
+      bagGrad.addColorStop(1, "#361908");
+      ctx.fillStyle = bagGrad;
       ctx.beginPath();
-      ctx.roundRect(-35, -20, 70, 42, [14, 14, 18, 18]);
+      ctx.roundRect(-32, -18, 64, 38, [12, 12, 16, 16]);
       ctx.fill();
 
-      // Saddle stitching line
-      ctx.strokeStyle = "#e59f5a";
+      // Saddle stitching on leather duffle
+      ctx.strokeStyle = "rgba(229, 168, 106, 0.7)";
       ctx.lineWidth = 1;
       ctx.setLineDash([3, 2]);
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Brass buckles & strap
+      // Brass hardware & rivets
       ctx.fillStyle = "#d4af37";
-      ctx.fillRect(-22, -18, 4, 38);
-      ctx.fillRect(18, -18, 4, 38);
+      ctx.fillRect(-20, -15, 3.5, 34);
+      ctx.fillRect(16, -15, 3.5, 34);
 
-      // Leather top handle
-      ctx.strokeStyle = "#4c240a";
-      ctx.lineWidth = 4;
+      // Rolled leather handle
+      ctx.strokeStyle = "#381c0c";
+      ctx.lineWidth = 3.5;
       ctx.beginPath();
-      ctx.arc(0, -22, 16, Math.PI, 0);
+      ctx.arc(0, -20, 14, Math.PI, 0);
       ctx.stroke();
-      ctx.restore();
+      ctx.restore(); // bag
 
-      // Arm reaching forward with VÉRAN blue dial on left wrist
-      const armProg = Math.max(0, (t - 0.25) / 0.35); // 0 at walk, 1 at bell reach
-      ctx.save();
-      ctx.translate(20, -110);
-      const armAngle = -0.2 + armProg * 0.45;
-      ctx.rotate(armAngle);
-
-      // Forearm sleeve
-      ctx.fillStyle = "#181a1f";
-      ctx.beginPath();
-      ctx.roundRect(0, -10, 85 + armProg * 35, 22, 6);
-      ctx.fill();
-
-      // White shirt cuff edge
-      ctx.fillStyle = "#f4f4f5";
-      ctx.fillRect(78 + armProg * 35, -8, 6, 18);
-
-      // Wrist position
-      const wristX = 86 + armProg * 35;
-      const wristY = 1;
-
-      // WATCH ON WRIST: Stainless steel case + Bleu de Paris dial visible!
-      ctx.save();
-      ctx.translate(wristX, wristY);
-
-      // Steel case
-      ctx.fillStyle = "#cbd5e1";
-      ctx.beginPath();
-      ctx.arc(0, 0, 10, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Blue dial glint
-      ctx.fillStyle = "#1e3a8a";
-      ctx.beginPath();
-      ctx.arc(0, 0, 7.5, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Sapphire glint ray
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(-5, -5);
-      ctx.lineTo(5, 5);
-      ctx.stroke();
-
-      ctx.restore(); // wrist
-      ctx.restore(); // arm
       ctx.restore(); // traveler
+      ctx.restore(); // act 1
+    }
 
-      // Reception Desk Counter (approaching in foreground)
-      const deskProgress = Math.min(1, t / 0.55);
-      const deskY = height * (0.78 - deskProgress * 0.08);
-      ctx.fillStyle = "#1a0f0a"; // Polished mahogany
+    // -------------------------------------------------------------
+    // ACT 2: CONCIERGE DESK, BRASS BELL & WRIST WATCH (t: 0.25 - 0.60)
+    // -------------------------------------------------------------
+    if (t >= 0.22 && t < 0.72) {
+      const act2Alpha = Math.min(1, (t - 0.22) / 0.12) * Math.max(0, 1 - (t - 0.58) / 0.14);
+      ctx.save();
+      ctx.globalAlpha = act2Alpha;
+
+      // Mahogany reception counter
+      const deskY = height * 0.68;
+      ctx.fillStyle = "#150d09";
       ctx.fillRect(0, deskY, width, height - deskY);
 
-      // Desk brass rim
-      ctx.fillStyle = "#b38f38";
-      ctx.fillRect(0, deskY, width, 4);
+      // Polished brass counter edge
+      ctx.fillStyle = "#997a2f";
+      ctx.fillRect(0, deskY, width, 3.5);
 
-      // Desk reflection
-      const deskRefGrad = ctx.createLinearGradient(0, deskY + 4, 0, deskY + 60);
-      deskRefGrad.addColorStop(0, "rgba(212, 175, 55, 0.15)");
-      deskRefGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = deskRefGrad;
-      ctx.fillRect(0, deskY + 4, width, 60);
+      // Patina leather bag placed on counter
+      ctx.save();
+      const deskBagX = width * 0.35;
+      const deskBagY = deskY - 35;
+      ctx.translate(deskBagX, deskBagY);
 
-      // Concierge Solid Brass Service Bell on desk
+      const bagDeskGrad = ctx.createLinearGradient(-60, -35, 60, 35);
+      bagDeskGrad.addColorStop(0, "#7a421e");
+      bagDeskGrad.addColorStop(0.5, "#522910");
+      bagDeskGrad.addColorStop(1, "#2f1506");
+      ctx.fillStyle = bagDeskGrad;
+      ctx.beginPath();
+      ctx.roundRect(-65, -35, 130, 70, 18);
+      ctx.fill();
+
+      // Brass buckle straps
+      ctx.fillStyle = "#d4af37";
+      ctx.fillRect(-40, -32, 5, 64);
+      ctx.fillRect(35, -32, 5, 64);
+      ctx.restore();
+
+      // Solid Brass Concierge Desk Bell
       const bellX = width * 0.62;
-      const bellY = deskY - 18;
+      const bellY = deskY - 24;
 
       ctx.save();
       ctx.translate(bellX, bellY);
 
       // Bell shadow
-      ctx.fillStyle = "rgba(0,0,0,0.45)";
+      ctx.fillStyle = "rgba(0,0,0,0.5)";
       ctx.beginPath();
-      ctx.ellipse(0, 16, 32, 8, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 18, 36, 10, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Bell brass base pedestal
-      ctx.fillStyle = "#8c6e26";
+      // Brass base
+      ctx.fillStyle = "#80631c";
       ctx.beginPath();
-      ctx.roundRect(-26, 8, 52, 10, 3);
+      ctx.roundRect(-30, 8, 60, 12, 3);
       ctx.fill();
 
-      // Bell polished brass dome
-      const bellGrad = ctx.createRadialGradient(-6, -4, 2, 0, 4, 28);
-      bellGrad.addColorStop(0, "#fff5cc");
-      bellGrad.addColorStop(0.3, "#e5c378");
-      bellGrad.addColorStop(0.7, "#b88c2b");
-      bellGrad.addColorStop(1, "#594211");
+      // Polished bell dome
+      const bellGrad = ctx.createRadialGradient(-8, -4, 2, 0, 4, 32);
+      bellGrad.addColorStop(0, "#fff8db");
+      bellGrad.addColorStop(0.35, "#e5c378");
+      bellGrad.addColorStop(0.7, "#a87f22");
+      bellGrad.addColorStop(1, "#543c0c");
       ctx.fillStyle = bellGrad;
-
       ctx.beginPath();
-      ctx.moveTo(-24, 8);
-      ctx.bezierCurveTo(-24, -14, 24, -14, 24, 8);
+      ctx.moveTo(-28, 8);
+      ctx.bezierCurveTo(-28, -16, 28, -16, 28, 8);
       ctx.closePath();
       ctx.fill();
 
-      // Top strike plunger pin
-      const plungerDepress = t >= 0.52 && t <= 0.65 ? 3 : 0;
+      // Plunger button on top
+      const depress = t >= 0.44 && t <= 0.52 ? 3 : 0;
       ctx.fillStyle = "#d4af37";
-      ctx.fillRect(-2.5, -20 + plungerDepress, 5, 8);
+      ctx.fillRect(-3, -22 + depress, 6, 8);
       ctx.beginPath();
-      ctx.arc(0, -20 + plungerDepress, 5.5, 0, Math.PI * 2);
+      ctx.arc(0, -22 + depress, 6, 0, Math.PI * 2);
       ctx.fill();
 
-      // Acoustic chime shockwave rings if bell struck (t >= 0.54)
-      if (t >= 0.53 && t <= 0.72) {
-        const ringProg = (t - 0.53) / 0.19;
-        ctx.strokeStyle = `rgba(243, 229, 171, ${Math.max(0, 0.8 - ringProg * 0.8)})`;
-        ctx.lineWidth = 2.5 - ringProg * 1.5;
+      // Acoustic chime shockwave rings
+      if (t >= 0.45 && t <= 0.62) {
+        const ringProg = (t - 0.45) / 0.17;
+        ctx.strokeStyle = `rgba(243, 229, 171, ${Math.max(0, 0.7 - ringProg * 0.7)})`;
+        ctx.lineWidth = 2 - ringProg;
         ctx.beginPath();
-        ctx.ellipse(0, -16, 25 + ringProg * 120, 14 + ringProg * 65, 0, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.strokeStyle = `rgba(212, 175, 55, ${Math.max(0, 0.5 - ringProg * 0.5)})`;
-        ctx.beginPath();
-        ctx.ellipse(0, -16, 12 + ringProg * 80, 8 + ringProg * 45, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, -18, 30 + ringProg * 140, 16 + ringProg * 75, 0, 0, Math.PI * 2);
         ctx.stroke();
       }
 
       ctx.restore(); // bell
-      ctx.restore(); // scene
+
+      // Hand reaching toward bell with Blue-Dial watch on wrist
+      const armProg = Math.max(0, (t - 0.32) / 0.22);
+      const armX = width * (0.85 - armProg * 0.22);
+      const armY = deskY - 10 - armProg * 12;
+
+      ctx.save();
+      ctx.translate(armX, armY);
+
+      // Charcoal cashmere sleeve
+      ctx.fillStyle = "#16181d";
+      ctx.beginPath();
+      ctx.roundRect(0, -14, 110, 28, 6);
+      ctx.fill();
+
+      // Crisp white double-cuff shirt edge
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(-8, -11, 8, 22);
+
+      // Wrist
+      ctx.fillStyle = "#dcb19c";
+      ctx.beginPath();
+      ctx.roundRect(-24, -9, 18, 18, 4);
+      ctx.fill();
+
+      // BLUE-DIAL WATCH VISIBLE ON WRIST
+      ctx.save();
+      ctx.translate(-15, 0);
+
+      // Steel case
+      ctx.fillStyle = "#e2e8f0";
+      ctx.beginPath();
+      ctx.arc(0, 0, 12, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Blue dial
+      ctx.fillStyle = "#1d4ed8";
+      ctx.beginPath();
+      ctx.arc(0, 0, 9, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Sapphire glint
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(-6, -6);
+      ctx.lineTo(6, 6);
+      ctx.stroke();
+
+      ctx.restore(); // watch
+      ctx.restore(); // arm
+      ctx.restore(); // act 2
     }
 
     // -------------------------------------------------------------
-    // STAGE 4 & 5: ULTRA-SHARP MACRO DIAL SEAMLESS ZOOM (t: 0.50 - 1.0)
+    // ACT 3: TERRACE SUITE WITH HAUSSMANN BALCONIES (t: 0.50 - 0.80)
     // -------------------------------------------------------------
-    if (t >= 0.45) {
-      const dialAlpha = Math.min(1, (t - 0.45) / 0.25);
-      const macroZoom = Math.min(1, (t - 0.50) / 0.50); // 0 at transition, 1 at full close-up
-
+    if (t >= 0.48 && t < 0.86) {
+      const act3Alpha = Math.min(1, (t - 0.48) / 0.12) * Math.max(0, 1 - (t - 0.74) / 0.12);
       ctx.save();
-      ctx.globalAlpha = dialAlpha;
+      ctx.globalAlpha = act3Alpha;
 
-      // Center of dial
-      const centerX = width * 0.5;
-      const centerY = height * 0.5;
+      // Overcast Parisian morning sky & Haussmann balcony skyline
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, height * 0.6);
+      skyGrad.addColorStop(0, "#475569");
+      skyGrad.addColorStop(0.5, "#64748b");
+      skyGrad.addColorStop(1, "#94a3b8");
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, width, height * 0.6);
 
-      // Dynamic radius scaling: starts smaller and expands smoothly to heroic macro viewport size
-      const startRadius = Math.min(width, height) * 0.18;
-      const maxRadius = Math.min(width, height) * 0.42;
-      const watchRadius = startRadius + (maxRadius - startRadius) * Math.pow(macroZoom, 1.2);
-
-      ctx.translate(centerX, centerY);
-
-      // Subtle dynamic wrist rotation that locks into straight 12-o'clock alignment
-      const rotationAngle = (1 - macroZoom) * -0.22;
-      ctx.rotate(rotationAngle);
-
-      // 1. WATCH CASE SHADOW & VIGNETTE
-      const shadowGrad = ctx.createRadialGradient(0, 0, watchRadius * 0.9, 0, 0, watchRadius * 1.45);
-      shadowGrad.addColorStop(0, "rgba(0, 0, 0, 0.85)");
-      shadowGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = shadowGrad;
+      // Zinc rooftops & Haussmann stone facade
+      ctx.fillStyle = "#334155";
       ctx.beginPath();
-      ctx.arc(0, 0, watchRadius * 1.45, 0, Math.PI * 2);
+      ctx.moveTo(0, height * 0.35);
+      ctx.lineTo(width * 0.25, height * 0.28);
+      ctx.lineTo(width * 0.5, height * 0.34);
+      ctx.lineTo(width * 0.75, height * 0.29);
+      ctx.lineTo(width, height * 0.36);
+      ctx.lineTo(width, height * 0.6);
+      ctx.lineTo(0, height * 0.6);
+      ctx.closePath();
       ctx.fill();
 
-      // 2. STAINLESS STEEL LUGS (316L satin brushed with polished chamfers)
-      ctx.fillStyle = "#8b949e";
-      const lugWidth = watchRadius * 0.28;
-      const lugLength = watchRadius * 1.22;
+      // Wrought-iron balcony railing
+      ctx.strokeStyle = "#0f172a";
+      ctx.lineWidth = 3;
+      const bY = height * 0.52;
+      ctx.beginPath();
+      ctx.moveTo(0, bY);
+      ctx.lineTo(width, bY);
+      ctx.moveTo(0, bY + 60);
+      ctx.lineTo(width, bY + 60);
+      ctx.stroke();
 
-      // 4 Lugs
-      const drawLug = (signX: number, signY: number) => {
+      for (let rx = 20; rx < width; rx += 50) {
+        ctx.beginPath();
+        ctx.moveTo(rx, bY);
+        ctx.lineTo(rx, bY + 60);
+        ctx.stroke();
+      }
+
+      // Bistro marble table on terrace
+      const tableGrad = ctx.createRadialGradient(width * 0.5, height * 0.82, 30, width * 0.5, height * 0.82, 380);
+      tableGrad.addColorStop(0, "#f8fafc");
+      tableGrad.addColorStop(0.7, "#cbd5e1");
+      tableGrad.addColorStop(1, "#475569");
+      ctx.fillStyle = tableGrad;
+      ctx.beginPath();
+      ctx.ellipse(width * 0.5, height * 0.86, width * 0.45, height * 0.28, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // The Patina Leather Bag resting on the terrace table
+      const zoomProgress = (t - 0.50) / 0.32;
+      const bagScale = 1.0 + zoomProgress * 0.8;
+      ctx.save();
+      ctx.translate(width * 0.5, height * 0.76);
+      ctx.scale(bagScale, bagScale);
+
+      const bagTerraceGrad = ctx.createLinearGradient(-90, -50, 90, 50);
+      bagTerraceGrad.addColorStop(0, "#80451e");
+      bagTerraceGrad.addColorStop(0.5, "#572b11");
+      bagTerraceGrad.addColorStop(1, "#331606");
+      ctx.fillStyle = bagTerraceGrad;
+      ctx.beginPath();
+      ctx.roundRect(-90, -45, 180, 90, 22);
+      ctx.fill();
+
+      // Watch resting horizontally on the leather bag
+      ctx.fillStyle = "#cbd5e1";
+      ctx.beginPath();
+      ctx.arc(0, -6, 24, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#1e40af";
+      ctx.beginPath();
+      ctx.arc(0, -6, 18, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore(); // bag scale
+      ctx.restore(); // act 3
+    }
+
+    // -------------------------------------------------------------
+    // ACT 4: MACRO HERO SHOT OF WATCH DIAL ON LEATHER PATINA (t: 0.68 - 1.0)
+    // -------------------------------------------------------------
+    if (t >= 0.65) {
+      const act4Alpha = Math.min(1, (t - 0.65) / 0.20);
+      ctx.save();
+      ctx.globalAlpha = act4Alpha;
+
+      const macroProgress = Math.min(1, (t - 0.70) / 0.30);
+      const cx = width * 0.5;
+      const cy = height * 0.5;
+
+      // Rich distressed brown patina leather background underneath the macro watch
+      const leatherBg = ctx.createRadialGradient(cx, cy, 50, cx, cy, width * 0.7);
+      leatherBg.addColorStop(0, "#3d2110");
+      leatherBg.addColorStop(0.5, "#261308");
+      leatherBg.addColorStop(1, "#0d0603");
+      ctx.fillStyle = leatherBg;
+      ctx.fillRect(0, 0, width, height);
+
+      // Fine leather grain texture & subtle saddle stitch
+      ctx.strokeStyle = "rgba(217, 149, 89, 0.15)";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(0, height * 0.15);
+      ctx.lineTo(width, height * 0.15);
+      ctx.moveTo(0, height * 0.85);
+      ctx.lineTo(width, height * 0.85);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Dynamic macro watch radius scaling to heroic focus
+      const startR = Math.min(width, height) * 0.22;
+      const targetR = Math.min(width, height) * 0.44;
+      const watchR = startR + (targetR - startR) * Math.pow(macroProgress, 1.1);
+
+      ctx.translate(cx, cy);
+
+      // 1. Drop shadow from watch case onto leather bag
+      const wShadow = ctx.createRadialGradient(0, 0, watchR * 0.9, 0, 0, watchR * 1.45);
+      wShadow.addColorStop(0, "rgba(0, 0, 0, 0.9)");
+      wShadow.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = wShadow;
+      ctx.beginPath();
+      ctx.arc(0, 0, watchR * 1.45, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 2. 316L Stainless steel lugs with hand-polished mirror chamfers
+      const drawLug = (sx: number, sy: number) => {
         ctx.save();
         ctx.beginPath();
-        ctx.moveTo(signX * (watchRadius * 0.72), signY * (watchRadius * 0.65));
-        ctx.lineTo(signX * (watchRadius * 0.78), signY * lugLength);
-        ctx.lineTo(signX * (watchRadius * 0.78 - lugWidth), signY * lugLength);
-        ctx.lineTo(signX * (watchRadius * 0.5), signY * (watchRadius * 0.85));
+        ctx.moveTo(sx * (watchR * 0.72), sy * (watchR * 0.65));
+        ctx.lineTo(sx * (watchR * 0.80), sy * (watchR * 1.25));
+        ctx.lineTo(sx * (watchR * 0.55), sy * (watchR * 1.25));
+        ctx.lineTo(sx * (watchR * 0.48), sy * (watchR * 0.85));
         ctx.closePath();
 
-        const lugGrad = ctx.createLinearGradient(
-          signX * (watchRadius * 0.5),
-          0,
-          signX * (watchRadius * 0.85),
-          0
-        );
-        lugGrad.addColorStop(0, "#e2e8f0");
-        lugGrad.addColorStop(0.4, "#94a3b8");
-        lugGrad.addColorStop(0.8, "#475569");
-        lugGrad.addColorStop(1, "#1e293b");
-        ctx.fillStyle = lugGrad;
+        const lGrad = ctx.createLinearGradient(sx * (watchR * 0.5), 0, sx * (watchR * 0.8), 0);
+        lGrad.addColorStop(0, "#ffffff");
+        lGrad.addColorStop(0.3, "#cbd5e1");
+        lGrad.addColorStop(0.7, "#64748b");
+        lGrad.addColorStop(1, "#1e293b");
+        ctx.fillStyle = lGrad;
         ctx.fill();
 
-        // Polished chamfer edge
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+        ctx.lineWidth = 1.8;
         ctx.stroke();
         ctx.restore();
       };
@@ -422,326 +504,155 @@ export function HeroScrollytelling() {
       drawLug(-1, 1);
       drawLug(1, 1);
 
-      // 3. BARANIL COGNAC / NAVY LEATHER STRAP EXTENSIONS (Top & Bottom)
-      const strapGrad = ctx.createLinearGradient(-watchRadius * 0.45, 0, watchRadius * 0.45, 0);
-      strapGrad.addColorStop(0, "#101e36");
-      strapGrad.addColorStop(0.3, "#1b335a");
-      strapGrad.addColorStop(0.7, "#152847");
-      strapGrad.addColorStop(1, "#0c1729");
-
-      // Top strap
-      ctx.fillStyle = strapGrad;
-      ctx.beginPath();
-      ctx.rect(-watchRadius * 0.45, -watchRadius * 1.35, watchRadius * 0.9, watchRadius * 0.55);
-      ctx.fill();
-
-      // Bottom strap
-      ctx.beginPath();
-      ctx.rect(-watchRadius * 0.45, watchRadius * 0.8, watchRadius * 0.9, watchRadius * 0.55);
-      ctx.fill();
-
-      // Strap edge saddle stitching
-      ctx.strokeStyle = "rgba(212, 175, 55, 0.45)";
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([4, 3]);
-      ctx.beginPath();
-      ctx.moveTo(-watchRadius * 0.42, -watchRadius * 1.35);
-      ctx.lineTo(-watchRadius * 0.42, -watchRadius * 0.8);
-      ctx.moveTo(watchRadius * 0.42, -watchRadius * 1.35);
-      ctx.lineTo(watchRadius * 0.42, -watchRadius * 0.8);
-      ctx.moveTo(-watchRadius * 0.42, watchRadius * 0.8);
-      ctx.lineTo(-watchRadius * 0.42, watchRadius * 1.35);
-      ctx.moveTo(watchRadius * 0.42, watchRadius * 0.8);
-      ctx.lineTo(watchRadius * 0.42, watchRadius * 1.35);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // 4. WATCH BEZEL: 316L Stainless Steel 39mm ring with coin-edge & chamfers
+      // 3. Stainless Steel 39mm Case & Bezel with circular satin finish
       const bezelGrad = ctx.createConicGradient(Math.PI * 0.25, 0, 0);
-      bezelGrad.addColorStop(0.0, "#f8fafc");
-      bezelGrad.addColorStop(0.15, "#94a3b8");
-      bezelGrad.addColorStop(0.3, "#334155");
-      bezelGrad.addColorStop(0.5, "#cbd5e1");
-      bezelGrad.addColorStop(0.65, "#475569");
-      bezelGrad.addColorStop(0.85, "#f1f5f9");
-      bezelGrad.addColorStop(1.0, "#94a3b8");
+      bezelGrad.addColorStop(0, "#ffffff");
+      bezelGrad.addColorStop(0.2, "#94a3b8");
+      bezelGrad.addColorStop(0.4, "#334155");
+      bezelGrad.addColorStop(0.6, "#e2e8f0");
+      bezelGrad.addColorStop(0.8, "#64748b");
+      bezelGrad.addColorStop(1, "#f8fafc");
 
       ctx.fillStyle = bezelGrad;
       ctx.beginPath();
-      ctx.arc(0, 0, watchRadius * 1.04, 0, Math.PI * 2);
+      ctx.arc(0, 0, watchR * 1.05, 0, Math.PI * 2);
       ctx.fill();
 
-      // Outer bezel polished rim
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
+      // Bezel outer step
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.95)";
       ctx.lineWidth = 2.5;
       ctx.stroke();
 
-      // Inner bezel step
-      ctx.fillStyle = "#1e293b";
-      ctx.beginPath();
-      ctx.arc(0, 0, watchRadius * 0.95, 0, Math.PI * 2);
-      ctx.fill();
-
-      // 5. BLUE DE PARIS GALVANIC SUNBURST DIAL
-      const dialGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, watchRadius * 0.92);
-      dialGrad.addColorStop(0.0, "#2563eb"); // Vivid cobalt center
-      dialGrad.addColorStop(0.35, "#1d4ed8");
-      dialGrad.addColorStop(0.65, "#1e3a8a");
-      dialGrad.addColorStop(0.9, "#0f1e36"); // Deep Parisian midnight edge
-      dialGrad.addColorStop(1.0, "#080e1a");
-
+      // 4. BLEU DE PARIS SUNBURST GALVANIC DIAL
+      const dialR = watchR * 0.92;
+      const dialGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, dialR);
+      dialGrad.addColorStop(0, "#2563eb"); // Vivid cobalt core
+      dialGrad.addColorStop(0.4, "#1d4ed8");
+      dialGrad.addColorStop(0.75, "#172554");
+      dialGrad.addColorStop(1, "#0a1122"); // Deep Parisian midnight edge
       ctx.fillStyle = dialGrad;
       ctx.beginPath();
-      ctx.arc(0, 0, watchRadius * 0.92, 0, Math.PI * 2);
+      ctx.arc(0, 0, dialR, 0, Math.PI * 2);
       ctx.fill();
 
-      // 6. MICRO SUNBURST RADIAL TEXTURE (Rotational lines)
+      // Micro sunburst radial brushing rays
       ctx.save();
       const numRays = 180;
       for (let r = 0; r < numRays; r++) {
-        const rayAngle = (r / numRays) * Math.PI * 2;
-        const alpha = Math.abs(Math.sin(rayAngle * 2 + 0.4)) * 0.12;
-        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+        const ang = (r / numRays) * Math.PI * 2;
+        const a = Math.abs(Math.sin(ang * 2.5 + 0.3)) * 0.14;
+        ctx.strokeStyle = `rgba(255, 255, 255, ${a})`;
         ctx.lineWidth = 0.8;
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.lineTo(Math.cos(rayAngle) * watchRadius * 0.92, Math.sin(rayAngle) * watchRadius * 0.92);
+        ctx.lineTo(Math.cos(ang) * dialR, Math.sin(ang) * dialR);
         ctx.stroke();
       }
       ctx.restore();
 
-      // 7. RAILWAY TRACK & MINUTE TICKS
-      ctx.strokeStyle = "rgba(212, 175, 55, 0.4)";
+      // 5. Applied Rhodium Hour Markers & Minute Track
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.arc(0, 0, watchRadius * 0.85, 0, Math.PI * 2);
-      ctx.arc(0, 0, watchRadius * 0.81, 0, Math.PI * 2);
+      ctx.arc(0, 0, dialR * 0.85, 0, Math.PI * 2);
       ctx.stroke();
 
       for (let m = 0; m < 60; m++) {
-        const angle = (m / 60) * Math.PI * 2 - Math.PI / 2;
+        const mAng = (m / 60) * Math.PI * 2 - Math.PI / 2;
         const isHour = m % 5 === 0;
-        const outerR = watchRadius * 0.85;
-        const innerR = isHour ? watchRadius * 0.77 : watchRadius * 0.81;
+        const oR = dialR * 0.85;
+        const iR = isHour ? dialR * 0.77 : dialR * 0.81;
 
-        ctx.strokeStyle = isHour ? "rgba(255, 255, 255, 0.85)" : "rgba(212, 175, 55, 0.35)";
+        ctx.strokeStyle = isHour ? "#ffffff" : "rgba(255, 255, 255, 0.35)";
         ctx.lineWidth = isHour ? 2 : 1;
         ctx.beginPath();
-        ctx.moveTo(Math.cos(angle) * innerR, Math.sin(angle) * innerR);
-        ctx.lineTo(Math.cos(angle) * outerR, Math.sin(angle) * outerR);
+        ctx.moveTo(Math.cos(mAng) * iR, Math.sin(mAng) * iR);
+        ctx.lineTo(Math.cos(mAng) * oR, Math.sin(mAng) * oR);
         ctx.stroke();
       }
 
-      // 8. APPLIED FACETED RHODIUM HOUR MARKERS (3D Chamfered batons)
+      // Faceted 3D hour markers
       for (let h = 1; h <= 12; h++) {
-        const hAngle = (h / 12) * Math.PI * 2 - Math.PI / 2;
+        const hAng = (h / 12) * Math.PI * 2 - Math.PI / 2;
         ctx.save();
-        ctx.rotate(hAngle);
-
-        const markerDist = watchRadius * 0.68;
-        const mLength = h % 3 === 0 ? watchRadius * 0.18 : watchRadius * 0.14;
+        ctx.rotate(hAng);
+        const dist = dialR * 0.68;
+        const len = h % 3 === 0 ? dialR * 0.18 : dialR * 0.14;
         const mWidth = h % 3 === 0 ? 5.5 : 4;
 
-        // Marker drop shadow
-        ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-        ctx.fillRect(markerDist - 1, -mWidth / 2 + 1, mLength, mWidth);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(dist, -mWidth / 2, len, mWidth);
 
-        // Marker body (rhodium gradient)
-        const markerGrad = ctx.createLinearGradient(markerDist, -mWidth / 2, markerDist + mLength, mWidth / 2);
-        markerGrad.addColorStop(0, "#ffffff");
-        markerGrad.addColorStop(0.5, "#cbd5e1");
-        markerGrad.addColorStop(1, "#64748b");
-
-        ctx.fillStyle = markerGrad;
-        ctx.beginPath();
-        ctx.moveTo(markerDist, -mWidth / 2);
-        ctx.lineTo(markerDist + mLength, -mWidth / 3);
-        ctx.lineTo(markerDist + mLength, mWidth / 3);
-        ctx.lineTo(markerDist, mWidth / 2);
-        ctx.closePath();
-        ctx.fill();
-
-        // 12 o'clock double index
         if (h === 12) {
-          ctx.beginPath();
-          ctx.moveTo(markerDist, -mWidth - 2);
-          ctx.lineTo(markerDist + mLength, -mWidth - 2);
-          ctx.lineTo(markerDist + mLength, -2);
-          ctx.lineTo(markerDist, -2);
-          ctx.closePath();
-          ctx.fill();
+          ctx.fillRect(dist, -mWidth - 3, len, mWidth);
         }
-
         ctx.restore();
       }
 
-      // 9. DIAL TYPOGRAPHY & CHRONOMÈTRE MARKINGS
+      // Dial Typography: VÉRAN · PARIS
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-
-      // VÉRAN brand mark
-      ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
-      ctx.font = `300 ${Math.round(watchRadius * 0.088)}px var(--font-serif), Georgia, serif`;
-      ctx.fillText("VÉRAN", 0, -watchRadius * 0.38);
-
-      // PARIS
-      ctx.fillStyle = "rgba(212, 175, 55, 0.75)";
-      ctx.font = `500 ${Math.round(watchRadius * 0.035)}px var(--font-sans), sans-serif`;
-      ctx.fillText("PARIS", 0, -watchRadius * 0.28);
-
-      // CHRONOMÈTRE / GLASHÜTTE CALIBRE
-      ctx.fillStyle = "rgba(226, 232, 240, 0.65)";
-      ctx.font = `400 ${Math.round(watchRadius * 0.032)}px var(--font-sans), sans-serif`;
-      ctx.fillText("CHRONOMÈTRE", 0, watchRadius * 0.34);
-      ctx.fillText("52H POWER RESERVE", 0, watchRadius * 0.42);
-
-      // MADE IN PARIS at 6 o'clock
-      ctx.font = `400 ${Math.round(watchRadius * 0.024)}px var(--font-sans), sans-serif`;
-      ctx.fillStyle = "rgba(212, 175, 55, 0.5)";
-      ctx.fillText("FABRIQUÉ À PARIS", 0, watchRadius * 0.76);
-
-      // 10. WATCH HANDS: Faceted Dauphine Hour & Minute Hands, Heat-Blued Seconds
-      const timeHours = 10;
-      const timeMinutes = 10;
-      const timeSeconds = 38 + t * 6; // subtle ticking progression
-
-      const hourAngle = ((timeHours % 12) + timeMinutes / 60) * (Math.PI / 6) - Math.PI / 2;
-      const minuteAngle = (timeMinutes + timeSeconds / 60) * (Math.PI / 30) - Math.PI / 2;
-      const secondAngle = timeSeconds * (Math.PI / 30) - Math.PI / 2;
-
-      // Draw Hour Hand
-      ctx.save();
-      ctx.rotate(hourAngle);
-      const hLength = watchRadius * 0.52;
-      const hWidth = watchRadius * 0.055;
-
-      // Hand shadow
-      ctx.fillStyle = "rgba(0,0,0,0.45)";
-      ctx.beginPath();
-      ctx.moveTo(3, -hWidth * 0.6);
-      ctx.lineTo(hLength + 4, 0);
-      ctx.lineTo(3, hWidth * 0.6);
-      ctx.closePath();
-      ctx.fill();
-
-      // Top faceted half (mirror light)
       ctx.fillStyle = "#ffffff";
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(hLength, 0);
-      ctx.lineTo(0, -hWidth);
-      ctx.closePath();
-      ctx.fill();
+      ctx.font = `400 ${Math.round(watchR * 0.088)}px var(--font-sans), sans-serif`;
+      ctx.fillText("VÉRAN", 0, -watchR * 0.36);
 
-      // Bottom faceted half (shaded rhodium)
-      ctx.fillStyle = "#64748b";
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(hLength, 0);
-      ctx.lineTo(0, hWidth);
-      ctx.closePath();
-      ctx.fill();
+      ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
+      ctx.font = `400 ${Math.round(watchR * 0.035)}px var(--font-sans), sans-serif`;
+      ctx.fillText("PARIS", 0, -watchR * 0.26);
+
+      ctx.font = `300 ${Math.round(watchR * 0.030)}px var(--font-sans), sans-serif`;
+      ctx.fillText("CHRONOMÈTRE · 52H", 0, watchR * 0.36);
+      ctx.fillText("MADE IN PARIS", 0, watchR * 0.74);
+
+      // Hands at 10:10
+      // Hour hand
+      ctx.save();
+      ctx.rotate(-0.85);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, -3, watchR * 0.52, 6);
       ctx.restore();
 
-      // Draw Minute Hand
+      // Minute hand
       ctx.save();
-      ctx.rotate(minuteAngle);
-      const mLength = watchRadius * 0.78;
-      const mHandWidth = watchRadius * 0.045;
-
-      // Hand shadow
-      ctx.fillStyle = "rgba(0,0,0,0.45)";
-      ctx.beginPath();
-      ctx.moveTo(4, -mHandWidth * 0.6);
-      ctx.lineTo(mLength + 5, 0);
-      ctx.lineTo(4, mHandWidth * 0.6);
-      ctx.closePath();
-      ctx.fill();
-
-      // Light side
+      ctx.rotate(0.55);
       ctx.fillStyle = "#ffffff";
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(mLength, 0);
-      ctx.lineTo(0, -mHandWidth);
-      ctx.closePath();
-      ctx.fill();
-
-      // Shadow side
-      ctx.fillStyle = "#94a3b8";
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(mLength, 0);
-      ctx.lineTo(0, mHandWidth);
-      ctx.closePath();
-      ctx.fill();
+      ctx.fillRect(0, -2.5, watchR * 0.76, 5);
       ctx.restore();
 
-      // Flame-Blued Needle Seconds Hand
+      // Flame-Blued needle seconds hand
       ctx.save();
-      ctx.rotate(secondAngle);
-      const sLength = watchRadius * 0.82;
-      const sTail = watchRadius * 0.22;
-
-      ctx.strokeStyle = "#38bdf8"; // Vibrant thermal-blued steel
+      ctx.rotate(2.0 + t * 4);
+      ctx.strokeStyle = "#38bdf8";
       ctx.lineWidth = 1.8;
       ctx.beginPath();
-      ctx.moveTo(-sTail, 0);
-      ctx.lineTo(sLength, 0);
+      ctx.moveTo(-watchR * 0.2, 0);
+      ctx.lineTo(watchR * 0.82, 0);
       ctx.stroke();
-
-      // Counterweight circular teardrop
-      ctx.fillStyle = "#0284c7";
-      ctx.beginPath();
-      ctx.arc(-sTail * 0.65, 0, 4, 0, Math.PI * 2);
-      ctx.fill();
       ctx.restore();
 
-      // Center Pinion & Cannon Pinion Cap
+      // Center Pinion
       ctx.fillStyle = "#ffffff";
       ctx.beginPath();
-      ctx.arc(0, 0, watchRadius * 0.038, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = "#1e293b";
-      ctx.beginPath();
-      ctx.arc(0, 0, watchRadius * 0.016, 0, Math.PI * 2);
+      ctx.arc(0, 0, 4.5, 0, Math.PI * 2);
       ctx.fill();
 
-      // 11. SAPPHIRE CRYSTAL SPECULAR ARCS & LIGHT SWEEP
-      ctx.save();
-      const sweepX = (t - 0.7) * 2.5 * watchRadius;
-      const crystalGrad = ctx.createLinearGradient(
-        -watchRadius + sweepX,
-        -watchRadius,
-        watchRadius + sweepX,
-        watchRadius
-      );
-      crystalGrad.addColorStop(0.0, "rgba(255, 255, 255, 0)");
-      crystalGrad.addColorStop(0.48, "rgba(255, 255, 255, 0.02)");
-      crystalGrad.addColorStop(0.5, "rgba(255, 255, 255, 0.38)");
-      crystalGrad.addColorStop(0.52, "rgba(255, 255, 255, 0.04)");
-      crystalGrad.addColorStop(1.0, "rgba(255, 255, 255, 0)");
-
-      ctx.fillStyle = crystalGrad;
+      // Double-domed Sapphire anti-reflective light sweep
+      const glareGrad = ctx.createLinearGradient(-dialR, -dialR, dialR, dialR);
+      glareGrad.addColorStop(0, "rgba(255, 255, 255, 0.35)");
+      glareGrad.addColorStop(0.3, "rgba(255, 255, 255, 0.05)");
+      glareGrad.addColorStop(1, "rgba(255, 255, 255, 0)");
+      ctx.fillStyle = glareGrad;
       ctx.beginPath();
-      ctx.arc(0, 0, watchRadius * 0.94, 0, Math.PI * 2);
+      ctx.arc(0, 0, dialR, 0, Math.PI * 2);
       ctx.fill();
 
-      // Edge box-sapphire refraction rim
-      ctx.strokeStyle = "rgba(186, 230, 253, 0.35)";
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.arc(0, 0, watchRadius * 0.92, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-
-      ctx.restore(); // macro dial
+      ctx.restore(); // macro watch
     }
 
     return offscreen;
   };
 
-  // Pre-render the 80 cinematic frames into cache for 0-stutter performance
+  // Pre-render frames into cache on mount for 0-stutter performance
   useEffect(() => {
     let isCancelled = false;
 
@@ -757,7 +668,6 @@ export function HeroScrollytelling() {
 
         if (i % 8 === 0 || i === totalFrames - 1) {
           setLoadProgress(Math.round(((i + 1) / totalFrames) * 100));
-          // Yield to main thread to avoid frame hitching
           await new Promise((resolve) => setTimeout(resolve, 8));
         }
       }
@@ -765,7 +675,7 @@ export function HeroScrollytelling() {
       framesCacheRef.current = frames;
       setLoaded(true);
 
-      // Initial draw on canvas
+      // Draw initial frame
       if (canvasRef.current && frames[0]) {
         const mainCtx = canvasRef.current.getContext("2d");
         if (mainCtx) {
@@ -781,15 +691,14 @@ export function HeroScrollytelling() {
     };
   }, []);
 
-  // Synchronize canvas scrub with GSAP ScrollTrigger
+  // GSAP context and ScrollTrigger pinning
   useEffect(() => {
     if (!loaded || !containerRef.current || !canvasRef.current) return;
 
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const ctxCanvas = canvas.getContext("2d");
+    if (!ctxCanvas) return;
 
-    // Handle high DPI resize
     const resizeCanvas = () => {
       const rect = canvas.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -800,79 +709,77 @@ export function HeroScrollytelling() {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // GSAP ScrollTrigger pinning and sequence scrubbing
-    const st = ScrollTrigger.create({
-      trigger: containerRef.current,
-      start: "top top",
-      end: "+=350%",
-      pin: true,
-      scrub: 0.35, // Buttery smooth easing on Lenis scrub
-      onUpdate: (self) => {
-        const progress = self.progress; // 0 to 1
-        const frameIndex = Math.min(
-          totalFrames - 1,
-          Math.floor(progress * totalFrames)
-        );
+    // Clean up GSAP instances using gsap.context() to avoid Next.js App Router memory leaks
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: containerRef.current,
+        start: "top top",
+        end: "+=400%",
+        pin: true,
+        scrub: 0.35,
+        onUpdate: (self) => {
+          const progress = self.progress; // 0 to 1
+          setScrubProgress(progress);
 
-        // Sound trigger for hotel bell chime at t: ~0.56
-        if (progress >= 0.55 && progress <= 0.65) {
-          if (!bellRungRef.current) {
-            bellRungRef.current = true;
-            soundManager.playConciergeBell();
-          }
-        } else if (progress < 0.45 || progress > 0.75) {
-          bellRungRef.current = false;
-        }
+          // Update Micro Telemetry: "00:01 / 00:07 · THE FIRST STEPS"
+          const totalSeconds = 7;
+          const currentSecond = Math.min(totalSeconds, Math.max(1, Math.ceil(progress * totalSeconds)));
+          const formattedSecond = `00:0${currentSecond}`;
+          setTelemetryTime(formattedSecond);
 
-        // Narrative status updates
-        if (progress < 0.28) {
-          setCurrentNarrative("Paris, Place Vendôme · Grand Hôtel Entrance");
-        } else if (progress < 0.52) {
-          setCurrentNarrative("Approaching Concierge Desk · Heritage Leather Duffle");
-        } else if (progress < 0.70) {
-          setCurrentNarrative("Ringing the Service Bell · The Wrist Reveal");
-        } else if (progress < 0.88) {
-          setCurrentNarrative("Macro Transition · Steel 39mm Bezel & Domed Sapphire");
-        } else {
-          setCurrentNarrative("Full Focus · LE VOYAGEUR Chronomètre");
-        }
-
-        // Draw cached frame
-        const cachedFrame = framesCacheRef.current[frameIndex];
-        if (cachedFrame) {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(cachedFrame, 0, 0, canvas.width, canvas.height);
-        }
-
-        // Text reveal when dial reaches full focus
-        if (textRef.current && subtextRef.current) {
-          if (progress > 0.75) {
-            const textAlpha = Math.min(1, (progress - 0.75) / 0.18);
-            const textY = (1 - textAlpha) * 40;
-            textRef.current.style.opacity = `${textAlpha}`;
-            textRef.current.style.transform = `translateY(${textY}px)`;
-            subtextRef.current.style.opacity = `${textAlpha}`;
-            subtextRef.current.style.transform = `translateY(${textY * 0.7}px)`;
+          if (progress < 0.28) {
+            setTelemetryLabel("THE FIRST STEPS");
+          } else if (progress < 0.52) {
+            setTelemetryLabel("CONCIERGE & BRASS BELL");
+          } else if (progress < 0.74) {
+            setTelemetryLabel("TERRACE & PATINA LEATHER");
           } else {
-            textRef.current.style.opacity = "0";
-            subtextRef.current.style.opacity = "0";
+            setTelemetryLabel("MACRO LE VOYAGEUR");
           }
-        }
 
-        // Fade out indicator on scroll
-        if (indicatorRef.current) {
-          indicatorRef.current.style.opacity = `${Math.max(0, 1 - progress * 4)}`;
-        }
-      },
-    });
+          // Service bell chime trigger at concierge desk
+          if (progress >= 0.45 && progress <= 0.55) {
+            if (!bellRungRef.current) {
+              bellRungRef.current = true;
+              soundManager.playConciergeBell();
+            }
+          } else if (progress < 0.38 || progress > 0.65) {
+            bellRungRef.current = false;
+          }
+
+          // Draw active frame from cache
+          const frameIndex = Math.min(totalFrames - 1, Math.floor(progress * totalFrames));
+          const cachedFrame = framesCacheRef.current[frameIndex];
+          if (cachedFrame) {
+            ctxCanvas.clearRect(0, 0, canvas.width, canvas.height);
+            ctxCanvas.drawImage(cachedFrame, 0, 0, canvas.width, canvas.height);
+          }
+
+          // Hero Typography Reveal: "LE VOYAGEUR"
+          if (textRef.current && subtextRef.current) {
+            if (progress > 0.72) {
+              const textAlpha = Math.min(1, (progress - 0.72) / 0.18);
+              const textY = (1 - textAlpha) * 35;
+              textRef.current.style.opacity = `${textAlpha}`;
+              textRef.current.style.transform = `translateY(${textY}px)`;
+              subtextRef.current.style.opacity = `${textAlpha}`;
+              subtextRef.current.style.transform = `translateY(${textY * 0.6}px)`;
+            } else {
+              textRef.current.style.opacity = "0";
+              subtextRef.current.style.opacity = "0";
+            }
+          }
+        },
+      });
+    }, containerRef);
 
     return () => {
-      st.kill();
+      ctx.revert(); // GSAP context clean-up
       window.removeEventListener("resize", resizeCanvas);
     };
   }, [loaded]);
 
-  const handleSkipToWatch = () => {
+  const handleSkipToSpecs = () => {
     const el = document.getElementById("product-breakdown");
     if (el) {
       el.scrollIntoView({ behavior: "smooth" });
@@ -880,91 +787,100 @@ export function HeroScrollytelling() {
   };
 
   return (
-    <section ref={containerRef} className="relative w-full h-screen bg-[#0b0c0e] overflow-hidden select-none">
-      {/* Loading overlay with Haute Horlogerie styling */}
+    <section
+      ref={containerRef}
+      className="relative w-full h-screen bg-black overflow-hidden select-none"
+    >
+      {/* Loading sequence indicator */}
       {!loaded && (
-        <div className="absolute inset-0 z-40 bg-[#0b0c0e] flex flex-col items-center justify-center p-6 text-center">
-          <div className="w-16 h-16 rounded-full border border-white/10 border-t-[#d4af37] animate-spin mb-6" />
-          <h2 className="font-serif text-2xl tracking-[0.3em] text-white uppercase mb-2">VÉRAN</h2>
-          <p className="text-[11px] tracking-[0.25em] text-zinc-400 uppercase mb-4">
-            Loading Optical Sequence · {loadProgress}%
+        <div className="absolute inset-0 z-40 bg-black flex flex-col items-center justify-center p-6 text-center">
+          <div className="w-12 h-12 rounded-full border border-white/10 border-t-white animate-spin mb-6" />
+          <h2 className="font-sans text-xl tracking-[0.35em] text-white uppercase mb-2">VÉRAN</h2>
+          <p className="text-[10px] tracking-[0.3em] text-zinc-400 uppercase font-mono mb-4">
+            Optical Sequence Buffer · {loadProgress}%
           </p>
-          <div className="w-48 h-0.5 bg-zinc-800 overflow-hidden rounded-full">
+          <div className="w-40 h-[1px] bg-zinc-800 overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-[#d4af37] to-[#f3e5ab] transition-all duration-300"
+              className="h-full bg-white transition-all duration-300"
               style={{ width: `${loadProgress}%` }}
             />
           </div>
         </div>
       )}
 
-      {/* Zero-stutter HTML5 Canvas */}
+      {/* HTML5 Zero-Stutter Canvas Sequence */}
       <canvas
         ref={canvasRef}
         className="w-full h-full object-cover block"
         style={{ width: "100%", height: "100%" }}
       />
 
-      {/* Atmospheric vignette overlays */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0b0c0e] via-transparent to-[#0b0c0e]/60" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0b0c0e]/50 via-transparent to-[#0b0c0e]/50" />
+      {/* Monochromatic editorial vignette */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/50" />
 
-      {/* Cinematic Scrollytelling Narrative Pill */}
-      <div className="absolute top-24 left-1/2 -translate-x-1/2 z-20 pointer-events-none transition-all duration-500">
-        <div className="px-5 py-2 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center space-x-3 text-[10px] md:text-xs tracking-[0.22em] uppercase text-zinc-300">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#d4af37] animate-pulse" />
-          <span>{currentNarrative}</span>
+      {/* Micro Telemetry Overlay during scrub: Bottom Left */}
+      <div className="absolute bottom-8 left-8 md:bottom-12 md:left-14 z-30 pointer-events-auto flex flex-col space-y-3">
+        <div className="flex items-center space-x-3 text-[10px] md:text-[11px] font-mono uppercase tracking-[0.22em] text-zinc-400">
+          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+          <span className="text-white font-medium">{telemetryTime} / 00:07</span>
+          <span className="text-zinc-400">·</span>
+          <span className="text-zinc-300 tracking-[0.25em]">{telemetryLabel}</span>
+        </div>
+
+        {/* Slider scrub bar indicator */}
+        <div className="flex items-center space-x-3">
+          <div className="w-44 sm:w-56 h-[2px] bg-white/15 relative overflow-hidden">
+            <div
+              className="h-full bg-white transition-all duration-75"
+              style={{ width: `${scrubProgress * 100}%` }}
+            />
+          </div>
+          <span className="text-[9px] font-mono text-zinc-400">
+            {Math.round(scrubProgress * 100)}%
+          </span>
         </div>
       </div>
 
-      {/* Massive Bold Typography Overlay: "LE VOYAGEUR" */}
+      {/* Hero Typography Reveal: Massive Bold "LE VOYAGEUR" */}
       <div className="absolute inset-0 z-30 flex flex-col items-center justify-center pointer-events-none px-6 text-center">
         <div
           ref={textRef}
-          style={{ opacity: 0, transform: "translateY(40px)" }}
-          className="transition-all duration-300 ease-out"
+          style={{ opacity: 0, transform: "translateY(35px)" }}
+          className="transition-all duration-300 ease-out flex flex-col items-center"
         >
-          <span className="text-[11px] md:text-xs uppercase tracking-[0.45em] text-[#d4af37] font-medium block mb-3 drop-shadow">
+          <span className="text-[10px] md:text-xs uppercase tracking-[0.45em] text-zinc-400 font-medium block mb-4">
             VÉRAN ATELIER · PARIS
           </span>
-          <h1 className="font-serif text-5xl sm:text-7xl md:text-8xl lg:text-9xl tracking-[0.16em] uppercase font-light text-white drop-shadow-[0_15px_35px_rgba(0,0,0,0.9)]">
+          <h1 className="font-sans text-5xl sm:text-7xl md:text-8xl lg:text-9xl tracking-[0.14em] uppercase font-bold text-white drop-shadow-[0_20px_50px_rgba(0,0,0,1)]">
             LE VOYAGEUR
           </h1>
         </div>
 
         <div
           ref={subtextRef}
-          style={{ opacity: 0, transform: "translateY(30px)" }}
+          style={{ opacity: 0, transform: "translateY(25px)" }}
           className="mt-6 flex flex-col items-center space-y-4 transition-all duration-300 ease-out pointer-events-auto"
         >
           <p className="text-xs md:text-sm tracking-[0.3em] uppercase text-zinc-300 max-w-xl font-light">
             Steel 39 mm · Hand-Wound Manufacture Calibre · €9,800
           </p>
-          <div className="flex items-center space-x-4 pt-2">
-            <button
-              onClick={handleSkipToWatch}
-              className="px-6 py-2.5 text-[11px] uppercase tracking-[0.25em] bg-[#d4af37] text-black font-semibold hover:bg-[#f3e5ab] transition-colors cursor-pointer shadow-lg"
-            >
-              Explore Timepiece
-            </button>
-          </div>
+          <button
+            onClick={handleSkipToSpecs}
+            className="px-6 py-2.5 text-[10px] uppercase tracking-[0.25em] bg-white text-black font-semibold hover:bg-zinc-200 transition-colors cursor-pointer"
+          >
+            Explore Specifications
+          </button>
         </div>
       </div>
 
-      {/* Bottom Scroll Prompt Indicator */}
-      <div
-        ref={indicatorRef}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center text-zinc-400 space-y-2 pointer-events-auto cursor-pointer"
-        onClick={handleSkipToWatch}
-      >
-        <span className="text-[10px] uppercase tracking-[0.32em] text-zinc-400 hover:text-white transition-colors">
-          Scroll to discover narrative
-        </span>
-        <div className="w-5 h-8 rounded-full border border-white/20 flex items-start justify-center p-1">
-          <div className="w-1 h-2 bg-[#d4af37] rounded-full animate-bounce" />
+      {/* Bottom Right Scroll Indicator */}
+      <div className="absolute bottom-8 right-8 md:bottom-12 md:right-14 z-30 hidden sm:flex items-center space-x-3 text-[10px] uppercase tracking-[0.25em] text-zinc-400">
+        <span>Scroll to scrub</span>
+        <div className="w-4 h-6 border border-white/20 rounded-full flex items-start justify-center p-1">
+          <div className="w-1 h-1.5 bg-white rounded-full animate-bounce" />
         </div>
       </div>
     </section>
   );
 }
-

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { TerraceWristView } from "./TerraceWristView";
 import { soundManager } from "@/lib/audio";
-import { Check, Sparkles, RefreshCw, Eye, Shield, Sliders } from "lucide-react";
+import { RefreshCw, Shield, Check } from "lucide-react";
 
 interface ProductBreakdownProps {
   onOpenBooking: () => void;
@@ -24,79 +24,87 @@ export function ProductBreakdown({ onOpenBooking }: ProductBreakdownProps) {
   };
 
   return (
-    <section id="product-breakdown" className="relative w-full py-28 md:py-36 bg-[#0b0c0e] border-t border-white/[0.08] px-6 md:px-12 overflow-hidden">
-      {/* Background ambient lighting */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#2563eb]/10 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#d4af37]/8 rounded-full blur-[140px] pointer-events-none" />
-
+    <section
+      id="product-breakdown"
+      className="relative w-full py-28 md:py-36 bg-[#000000] border-t border-white/10 px-6 md:px-14 overflow-hidden"
+    >
       <div className="max-w-7xl mx-auto">
-        {/* Section Header Micro-badge */}
+        
+        {/* Monochromatic micro-header */}
         <div className="flex items-center space-x-3 mb-12">
-          <span className="w-8 h-[1px] bg-[#d4af37]" />
-          <span className="text-[11px] uppercase tracking-[0.35em] text-[#d4af37] font-medium">
-            Le Garde-Temps · Masterpiece Breakdown
+          <span className="w-6 h-[1px] bg-white/40" />
+          <span className="text-[10px] uppercase tracking-[0.35em] text-zinc-400 font-mono">
+            01 · SPECIFICATION & PURCHASE SHEET
           </span>
         </div>
 
-        {/* 3-Column Split View Layout */}
+        {/* 3-Column Structured Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start">
           
-          {/* LEFT COLUMN: Bold Luxury Typography & Artisan Description */}
+          {/* ----------------------------------------------------------- */}
+          {/* LEFT COLUMN: Large Bold Headline & Artisan Body Copy        */}
+          {/* ----------------------------------------------------------- */}
           <div className="lg:col-span-4 flex flex-col justify-between space-y-8 lg:pr-6">
             <div>
-              <span className="text-xs uppercase tracking-[0.3em] text-zinc-400 font-medium block mb-3">
-                Reference VRN-01 · 2026 Edition
+              <span className="text-[10px] font-mono uppercase tracking-[0.28em] text-zinc-400 block mb-4">
+                Reference VRN-01 · Edition Limitée
               </span>
-              <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-white leading-[1.12] tracking-tight uppercase mb-6">
+
+              {/* Large bold headline: "STEEL, 39 MM, HAND-WOUND." */}
+              <h2 className="font-sans text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-[1.08] tracking-tight uppercase mb-6">
                 STEEL, 39 MM,<br />
-                <span className="italic font-normal text-[#f3e5ab]">HAND-WOUND.</span>
+                <span className="text-zinc-400 font-light">HAND-WOUND.</span>
               </h2>
 
-              <div className="relative pl-5 border-l border-[#d4af37]/40 mb-8">
-                <p className="text-base sm:text-lg text-zinc-200 font-serif italic leading-relaxed">
+              {/* Body copy */}
+              <div className="relative pl-5 border-l border-white/20 mb-8">
+                <p className="text-base sm:text-lg text-white font-serif italic leading-relaxed">
                   “Made by VÉRAN in Paris. Glashütte lines, guilloché slate, and a strap you change without tools.”
                 </p>
               </div>
 
               <div className="space-y-4 text-xs sm:text-sm text-zinc-400 leading-relaxed font-light">
                 <p>
-                  Conceived in our Place Vendôme studio and brought to life through five hundred hours of hand execution, Le Voyageur captures the classical proportion of Mid-Century French chronometers.
+                  Conceived in our Place Vendôme studio and brought to life through 500 hours of artisanal hand execution, Le Voyageur captures the classical balance of Mid-Century French chronometry.
                 </p>
                 <p>
-                  Its 39.0 mm surgical-grade 316L stainless steel case measures just 9.8 mm in profile, allowing it to slide gracefully beneath a tailored cuff, while its curved lugs follow the natural contours of the wrist.
-                </p>
-                <p>
-                  The bevels on every lug flank are manually drawn with diamond paste on wooden laps to achieve an undistorted optical mirror finish.
+                  Its 39.0 mm surgical-grade 316L stainless steel case measures just 9.8 mm in profile, engineered to slide effortlessly beneath bespoke cuffs, while curved lugs mirror the natural anatomy of the wrist.
                 </p>
               </div>
             </div>
 
-            {/* Artisan Highlights */}
+            {/* Atelier Details */}
             <div className="pt-6 border-t border-white/10 grid grid-cols-2 gap-4">
               <div>
-                <span className="block text-[10px] uppercase tracking-[0.2em] text-zinc-400 mb-1">
-                  Provenance
+                <span className="block text-[9px] uppercase tracking-[0.25em] text-zinc-400 mb-1 font-mono">
+                  Atelier
                 </span>
-                <span className="text-sm font-serif text-white">Paris & Vallée de Joux</span>
+                <span className="text-xs font-sans text-white uppercase tracking-wider">
+                  Place Vendôme, Paris
+                </span>
               </div>
               <div>
-                <span className="block text-[10px] uppercase tracking-[0.2em] text-zinc-400 mb-1">
-                  Annual Allocation
+                <span className="block text-[9px] uppercase tracking-[0.25em] text-zinc-400 mb-1 font-mono">
+                  Series Allocation
                 </span>
-                <span className="text-sm font-serif text-[#d4af37]">150 Numbered Pieces</span>
+                <span className="text-xs font-sans text-zinc-300 uppercase tracking-wider">
+                  150 Numbered Pieces
+                </span>
               </div>
             </div>
           </div>
 
-          {/* CENTER COLUMN: Crisp Portrait Image of the Watch on Wrist on Parisian Terrace */}
+          {/* ----------------------------------------------------------- */}
+          {/* CENTER COLUMN: Editorial Portrait Photo of Watch on Wrist  */}
+          {/* ----------------------------------------------------------- */}
           <div className="lg:col-span-4 flex flex-col items-center">
-            {/* View Mode Switcher Pills */}
-            <div className="flex items-center space-x-1.5 p-1 bg-white/[0.04] border border-white/10 rounded-full mb-6">
+            {/* View switcher pills */}
+            <div className="flex items-center space-x-1 p-1 bg-white/[0.04] border border-white/10 rounded-full mb-6">
               <button
                 onClick={() => handleViewModeChange("wrist")}
-                className={`px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
+                className={`px-3 py-1.5 text-[9.5px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
                   viewMode === "wrist"
-                    ? "bg-[#d4af37] text-black font-semibold shadow-md"
+                    ? "bg-white text-black font-semibold shadow-sm"
                     : "text-zinc-400 hover:text-white"
                 }`}
               >
@@ -104,9 +112,9 @@ export function ProductBreakdown({ onOpenBooking }: ProductBreakdownProps) {
               </button>
               <button
                 onClick={() => handleViewModeChange("macro")}
-                className={`px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
+                className={`px-3 py-1.5 text-[9.5px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
                   viewMode === "macro"
-                    ? "bg-[#d4af37] text-black font-semibold shadow-md"
+                    ? "bg-white text-black font-semibold shadow-sm"
                     : "text-zinc-400 hover:text-white"
                 }`}
               >
@@ -114,9 +122,9 @@ export function ProductBreakdown({ onOpenBooking }: ProductBreakdownProps) {
               </button>
               <button
                 onClick={() => handleViewModeChange("caseback")}
-                className={`px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
+                className={`px-3 py-1.5 text-[9.5px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
                   viewMode === "caseback"
-                    ? "bg-[#d4af37] text-black font-semibold shadow-md"
+                    ? "bg-white text-black font-semibold shadow-sm"
                     : "text-zinc-400 hover:text-white"
                 }`}
               >
@@ -124,18 +132,18 @@ export function ProductBreakdown({ onOpenBooking }: ProductBreakdownProps) {
               </button>
             </div>
 
-            {/* High-Resolution Interactive Canvas */}
+            {/* High-Resolution Portrait Canvas */}
             <TerraceWristView strapType={strap} viewMode={viewMode} />
 
-            {/* Quick-Release "Strap You Change Without Tools" Selector */}
-            <div className="w-full max-w-[540px] mt-6 bg-white/[0.02] border border-white/10 p-4">
+            {/* Tool-Free Strap Selector */}
+            <div className="w-full max-w-[540px] mt-6 bg-[#0a0a0a] border border-white/10 p-4">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[10px] uppercase tracking-[0.25em] text-zinc-300 flex items-center gap-1.5">
-                  <RefreshCw size={12} className="text-[#d4af37]" />
+                  <RefreshCw size={11} className="text-white" />
                   Tool-Free Interchangeable Straps
                 </span>
-                <span className="text-[9px] uppercase tracking-[0.2em] text-[#d4af37]">
-                  Quick-Release Spring Bar
+                <span className="text-[9px] uppercase tracking-[0.2em] text-zinc-400 font-mono">
+                  Quick-Release
                 </span>
               </div>
 
@@ -144,24 +152,24 @@ export function ProductBreakdown({ onOpenBooking }: ProductBreakdownProps) {
                   onClick={() => handleStrapChange("cognac")}
                   className={`p-2.5 text-left border transition-all cursor-pointer ${
                     strap === "cognac"
-                      ? "border-[#d4af37] bg-[#d4af37]/10"
-                      : "border-white/10 hover:border-white/30 bg-black/40"
+                      ? "border-white bg-white/10"
+                      : "border-white/10 hover:border-white/30 bg-black"
                   }`}
                 >
-                  <div className="w-full h-3 bg-[#854316] rounded-xs mb-1.5" />
+                  <div className="w-full h-2.5 bg-[#854316] mb-1.5" />
                   <span className="block text-[10px] font-medium text-white truncate">Baranil Cognac</span>
-                  <span className="block text-[9px] text-zinc-400">French Calf</span>
+                  <span className="block text-[9px] text-zinc-400">French Calfskin</span>
                 </button>
 
                 <button
                   onClick={() => handleStrapChange("blue")}
                   className={`p-2.5 text-left border transition-all cursor-pointer ${
                     strap === "blue"
-                      ? "border-[#d4af37] bg-[#d4af37]/10"
-                      : "border-white/10 hover:border-white/30 bg-black/40"
+                      ? "border-white bg-white/10"
+                      : "border-white/10 hover:border-white/30 bg-black"
                   }`}
                 >
-                  <div className="w-full h-3 bg-[#1e3a8a] rounded-xs mb-1.5" />
+                  <div className="w-full h-2.5 bg-[#1e3a8a] mb-1.5" />
                   <span className="block text-[10px] font-medium text-white truncate">Bleu Nuit</span>
                   <span className="block text-[9px] text-zinc-400">Matte Alligator</span>
                 </button>
@@ -170,11 +178,11 @@ export function ProductBreakdown({ onOpenBooking }: ProductBreakdownProps) {
                   onClick={() => handleStrapChange("steel")}
                   className={`p-2.5 text-left border transition-all cursor-pointer ${
                     strap === "steel"
-                      ? "border-[#d4af37] bg-[#d4af37]/10"
-                      : "border-white/10 hover:border-white/30 bg-black/40"
+                      ? "border-white bg-white/10"
+                      : "border-white/10 hover:border-white/30 bg-black"
                   }`}
                 >
-                  <div className="w-full h-3 bg-gradient-to-r from-zinc-400 via-zinc-200 to-zinc-400 rounded-xs mb-1.5" />
+                  <div className="w-full h-2.5 bg-gradient-to-r from-zinc-400 via-zinc-200 to-zinc-400 mb-1.5" />
                   <span className="block text-[10px] font-medium text-white truncate">Beads of Rice</span>
                   <span className="block text-[9px] text-zinc-400">316L Steel</span>
                 </button>
@@ -182,96 +190,91 @@ export function ProductBreakdown({ onOpenBooking }: ProductBreakdownProps) {
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Technical Specs Table, Price & Book a Fitting */}
+          {/* ----------------------------------------------------------- */}
+          {/* RIGHT COLUMN: Detailed Specs List, Price & Dark CTA Button */}
+          {/* ----------------------------------------------------------- */}
           <div className="lg:col-span-4 flex flex-col justify-between space-y-8 lg:pl-6">
             <div>
-              <span className="text-xs uppercase tracking-[0.3em] text-[#d4af37] font-medium block mb-3">
-                Technical Specifications
+              <span className="text-[10px] uppercase tracking-[0.3em] text-zinc-400 font-mono block mb-2">
+                Horological Datasheet
               </span>
-              <h3 className="font-serif text-2xl font-light text-white uppercase tracking-wider mb-6">
+              <h3 className="font-sans text-2xl font-normal text-white uppercase tracking-wider mb-6">
                 SPECIFICATIONS
               </h3>
 
-              {/* Specs Table */}
-              <div className="divide-y divide-white/10 text-xs">
+              {/* Detailed specs list */}
+              <div className="divide-y divide-white/10 text-xs font-light">
                 <div className="py-2.5 flex justify-between items-center">
-                  <span className="text-zinc-400 uppercase tracking-[0.18em]">Case Diameter</span>
-                  <span className="text-zinc-100 font-medium">39.0 mm</span>
+                  <span className="text-zinc-400 uppercase tracking-[0.18em]">Case</span>
+                  <span className="text-white font-medium">Stainless steel 316L</span>
                 </div>
                 <div className="py-2.5 flex justify-between items-center">
-                  <span className="text-zinc-400 uppercase tracking-[0.18em]">Thickness</span>
-                  <span className="text-zinc-100 font-medium">9.8 mm (sapphire included)</span>
-                </div>
-                <div className="py-2.5 flex justify-between items-center">
-                  <span className="text-zinc-400 uppercase tracking-[0.18em]">Lug-to-Lug</span>
-                  <span className="text-zinc-100 font-medium">46.2 mm</span>
-                </div>
-                <div className="py-2.5 flex justify-between items-center">
-                  <span className="text-zinc-400 uppercase tracking-[0.18em]">Case Material</span>
-                  <span className="text-zinc-100 font-medium">316L Stainless Steel</span>
+                  <span className="text-zinc-400 uppercase tracking-[0.18em]">Diameter</span>
+                  <span className="text-white font-medium">39 mm</span>
                 </div>
                 <div className="py-2.5 flex justify-between items-center">
                   <span className="text-zinc-400 uppercase tracking-[0.18em]">Movement</span>
-                  <span className="text-zinc-100 font-medium">Calibre V-101 Manufacture</span>
+                  <span className="text-white font-medium">Hand-wound caliber (V-101)</span>
                 </div>
                 <div className="py-2.5 flex justify-between items-center">
-                  <span className="text-zinc-400 uppercase tracking-[0.18em]">Winding</span>
-                  <span className="text-zinc-100 font-medium">Manual Wind (52h Reserve)</span>
+                  <span className="text-zinc-400 uppercase tracking-[0.18em]">Glass</span>
+                  <span className="text-white font-medium">Double domed sapphire</span>
+                </div>
+                <div className="py-2.5 flex justify-between items-center">
+                  <span className="text-zinc-400 uppercase tracking-[0.18em]">Thickness</span>
+                  <span className="text-white font-medium">9.8 mm (glass included)</span>
                 </div>
                 <div className="py-2.5 flex justify-between items-center">
                   <span className="text-zinc-400 uppercase tracking-[0.18em]">Frequency</span>
-                  <span className="text-zinc-100 font-medium">28,800 vph (4 Hz)</span>
+                  <span className="text-white font-medium">28,800 vph (4 Hz)</span>
                 </div>
                 <div className="py-2.5 flex justify-between items-center">
-                  <span className="text-zinc-400 uppercase tracking-[0.18em]">Jewels</span>
-                  <span className="text-zinc-100 font-medium">21 Rubies in Gold Chatons</span>
+                  <span className="text-zinc-400 uppercase tracking-[0.18em]">Power Reserve</span>
+                  <span className="text-white font-medium">52 Hours Autonomy</span>
                 </div>
                 <div className="py-2.5 flex justify-between items-center">
                   <span className="text-zinc-400 uppercase tracking-[0.18em]">Water Resistance</span>
-                  <span className="text-zinc-100 font-medium">5 ATM (50 meters)</span>
-                </div>
-                <div className="py-2.5 flex justify-between items-center">
-                  <span className="text-zinc-400 uppercase tracking-[0.18em]">Crystal</span>
-                  <span className="text-zinc-100 font-medium">Box-domed Sapphire AR</span>
+                  <span className="text-white font-medium">5 ATM (50 meters)</span>
                 </div>
               </div>
             </div>
 
-            {/* Price Indicator & Interactive Book a Fitting CTA */}
-            <div className="bg-[#14171c] border border-white/10 p-6 space-y-5">
+            {/* Pricing & Dark CTA Button */}
+            <div className="bg-[#0a0a0a] border border-white/10 p-6 space-y-6">
               <div className="flex items-baseline justify-between">
                 <div>
-                  <span className="text-[10px] uppercase tracking-[0.25em] text-zinc-400 block mb-1">
+                  <span className="text-[9px] uppercase tracking-[0.25em] text-zinc-400 font-mono block mb-1">
                     Direct Atelier Price
                   </span>
                   <div className="flex items-baseline space-x-2">
-                    <span className="font-serif text-3xl sm:text-4xl font-light text-white">
+                    <span className="font-sans text-3xl sm:text-4xl font-normal text-white">
                       €9,800
                     </span>
-                    <span className="text-[11px] text-zinc-400 uppercase tracking-widest">
+                    <span className="text-[10px] text-zinc-400 uppercase tracking-widest font-mono">
                       EUR
                     </span>
                   </div>
                 </div>
-                <span className="text-[10px] uppercase tracking-wider text-emerald-400 font-medium flex items-center gap-1">
-                  <Check size={12} /> In Production
+                <span className="text-[10px] uppercase tracking-wider text-zinc-300 font-mono flex items-center gap-1">
+                  <Check size={12} className="text-white" /> In Production
                 </span>
               </div>
 
               <p className="text-[11px] text-zinc-400 leading-relaxed font-light">
-                Taxes included. Includes bespoke presentation box, warranty certificate registered in Paris, and two interchangeable straps.
+                Taxes included. Includes handmade patina presentation box, registered chronometer warranty, and two interchangeable straps.
               </p>
 
+              {/* Dark CTA button: "Book a fitting" */}
               <button
                 onClick={onOpenBooking}
-                className="w-full py-4 bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#d4af37] text-black font-semibold uppercase tracking-[0.25em] text-xs transition-all duration-300 hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] hover:brightness-105 active:scale-[0.99] cursor-pointer"
+                className="w-full py-4 bg-[#141414] hover:bg-white hover:text-black border border-white/20 text-white font-medium uppercase tracking-[0.25em] text-xs transition-all duration-300 cursor-pointer shadow-lg active:scale-[0.99]"
               >
                 Book a fitting
               </button>
 
-              <div className="flex items-center justify-between text-[10px] text-zinc-400 uppercase tracking-wider pt-2 border-t border-white/5">
+              <div className="flex items-center justify-between text-[10px] text-zinc-400 uppercase tracking-wider pt-2 border-t border-white/10 font-mono">
                 <span className="flex items-center gap-1">
-                  <Shield size={11} className="text-[#d4af37]" /> 5-Year Guarantee
+                  <Shield size={11} className="text-white" /> 5-Year Guarantee
                 </span>
                 <span>Worldwide Insured Courier</span>
               </div>
@@ -280,8 +283,8 @@ export function ProductBreakdown({ onOpenBooking }: ProductBreakdownProps) {
           </div>
 
         </div>
+
       </div>
     </section>
   );
 }
-

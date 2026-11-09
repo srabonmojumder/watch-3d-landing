@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { Compass, Feather, MapPin, CheckCircle2 } from "lucide-react";
+import { Compass, CheckCircle2 } from "lucide-react";
 
 export function ProvenanceSection() {
   return (
-    <section className="relative w-full py-28 md:py-36 bg-[#08090b] border-t border-white/[0.08] px-6 md:px-12 overflow-hidden">
+    <section className="relative w-full py-28 md:py-36 bg-black border-t border-white/10 px-6 md:px-14 overflow-hidden">
       <div className="max-w-7xl mx-auto">
         
         {/* Story Grid */}
@@ -13,19 +13,13 @@ export function ProvenanceSection() {
           
           {/* Left Column: Visual Atelier Plaque */}
           <div className="lg:col-span-5 relative">
-            <div className="relative aspect-[4/5] w-full max-w-[460px] mx-auto bg-gradient-to-br from-[#181b20] via-[#101216] to-[#0a0b0d] border border-white/10 p-8 flex flex-col justify-between shadow-2xl">
+            <div className="relative aspect-[4/5] w-full max-w-[440px] mx-auto bg-[#0a0a0a] border border-white/15 p-8 flex flex-col justify-between shadow-2xl">
               
-              {/* Corner brass rosettes */}
-              <div className="absolute top-3 left-3 w-2 h-2 rounded-full bg-[#d4af37]" />
-              <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-[#d4af37]" />
-              <div className="absolute bottom-3 left-3 w-2 h-2 rounded-full bg-[#d4af37]" />
-              <div className="absolute bottom-3 right-3 w-2 h-2 rounded-full bg-[#d4af37]" />
-
               <div className="space-y-2">
-                <span className="text-[10px] uppercase tracking-[0.35em] text-[#d4af37] font-semibold">
+                <span className="text-[9px] font-mono uppercase tracking-[0.35em] text-zinc-400">
                   Maison VÉRAN · Fondée à Paris
                 </span>
-                <h3 className="font-serif text-3xl text-white font-light">
+                <h3 className="font-sans text-2xl text-white font-normal uppercase tracking-wider">
                   12, Place Vendôme
                 </h3>
                 <p className="text-xs text-zinc-400 font-light">
@@ -35,20 +29,20 @@ export function ProvenanceSection() {
 
               {/* Hand engraving illustration badge */}
               <div className="py-8 my-auto flex flex-col items-center text-center border-y border-white/10">
-                <div className="w-20 h-20 rounded-full border border-[#d4af37]/40 flex items-center justify-center mb-4 bg-black/40">
-                  <Compass size={32} className="text-[#d4af37] stroke-[1.2]" />
+                <div className="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center mb-4 bg-black">
+                  <Compass size={28} className="text-white stroke-[1.2]" />
                 </div>
-                <span className="font-serif text-xl text-white tracking-widest uppercase mb-1">
+                <span className="font-sans text-base text-white tracking-widest uppercase mb-1 font-medium">
                   HORLOGERIE D’EXCEPTION
                 </span>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-400">
+                <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-zinc-400">
                   Design Parisien · Mécanique Glashütte
                 </p>
               </div>
 
-              <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-zinc-400">
+              <div className="flex items-center justify-between text-[9px] font-mono uppercase tracking-widest text-zinc-400">
                 <span>Certificat Numéroté</span>
-                <span className="text-[#d4af37]">Édition Limitée</span>
+                <span className="text-white">Édition Limitée</span>
               </div>
             </div>
           </div>
@@ -57,13 +51,13 @@ export function ProvenanceSection() {
           <div className="lg:col-span-7 space-y-8 lg:pl-6">
             <div>
               <div className="flex items-center space-x-3 mb-3">
-                <span className="w-8 h-[1px] bg-[#d4af37]" />
-                <span className="text-[11px] uppercase tracking-[0.35em] text-[#d4af37] font-medium">
-                  Artisan Provenance
+                <span className="w-6 h-[1px] bg-white/40" />
+                <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-zinc-400">
+                  04 · PROVENANCE
                 </span>
               </div>
 
-              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-light text-white leading-tight uppercase mb-6">
+              <h2 className="font-sans text-3xl sm:text-4xl md:text-5xl font-light text-white leading-tight uppercase mb-6">
                 “BORN FROM THE SILENCE OF THE ATELIER.”
               </h2>
 
@@ -84,25 +78,25 @@ export function ProvenanceSection() {
             {/* Checklist of Heritage Standards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-white/10 text-xs">
               <div className="flex items-start space-x-3">
-                <CheckCircle2 size={16} className="text-[#d4af37] shrink-0 mt-0.5" />
+                <CheckCircle2 size={15} className="text-white shrink-0 mt-0.5" />
                 <span className="text-zinc-300">
                   Zero tool strap swap with patented dual spring-bar levers.
                 </span>
               </div>
               <div className="flex items-start space-x-3">
-                <CheckCircle2 size={16} className="text-[#d4af37] shrink-0 mt-0.5" />
+                <CheckCircle2 size={15} className="text-white shrink-0 mt-0.5" />
                 <span className="text-zinc-300">
                   Hand-turned Clous de Paris guilloché by French master engravers.
                 </span>
               </div>
               <div className="flex items-start space-x-3">
-                <CheckCircle2 size={16} className="text-[#d4af37] shrink-0 mt-0.5" />
+                <CheckCircle2 size={15} className="text-white shrink-0 mt-0.5" />
                 <span className="text-zinc-300">
                   52-hour chronometer reserve adjusted across 5 positions.
                 </span>
               </div>
               <div className="flex items-start space-x-3">
-                <CheckCircle2 size={16} className="text-[#d4af37] shrink-0 mt-0.5" />
+                <CheckCircle2 size={15} className="text-white shrink-0 mt-0.5" />
                 <span className="text-zinc-300">
                   Individually numbered caseback with archival ledger entry.
                 </span>
@@ -117,4 +111,3 @@ export function ProvenanceSection() {
     </section>
   );
 }
-
