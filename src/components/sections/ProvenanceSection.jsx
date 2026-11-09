@@ -1,20 +1,15 @@
 "use client";
-
 import React, { useState } from "react";
-import { Compass, CheckCircle2, Sparkles, Box } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { Watch3DInteractive } from "./Watch3DInteractive";
 import { soundManager } from "@/lib/audio";
-
 export function ProvenanceSection() {
-  const [atelierAngle, setAtelierAngle] = useState<"wrist" | "macro" | "profile" | "caseback">("wrist");
-
-  const handleAngleChange = (angle: "wrist" | "macro" | "profile" | "caseback") => {
-    soundManager.playSoftClick();
-    setAtelierAngle(angle);
-  };
-
-  return (
-    <section className="relative w-full py-28 md:py-36 bg-black border-t border-white/10 px-6 md:px-14 overflow-hidden">
+    const [atelierAngle, setAtelierAngle] = useState("wrist");
+    const handleAngleChange = (angle) => {
+        soundManager.playSoftClick();
+        setAtelierAngle(angle);
+    };
+    return (<section className="relative w-full py-28 md:py-36 bg-black border-t border-white/10 px-6 md:px-14 overflow-hidden">
       <div className="max-w-7xl mx-auto">
         
         {/* Story Grid */}
@@ -35,21 +30,14 @@ export function ProvenanceSection() {
                   </h3>
                 </div>
                 <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[8.5px] font-mono text-zinc-300">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"/>
                   <span>3D Atelier Stage</span>
                 </div>
               </div>
 
               {/* 3D WebGL Timepiece Atelier Stage */}
               <div className="relative w-full aspect-[4/4] bg-gradient-to-b from-[#12141a] via-[#090b0e] to-[#040507] border border-white/10 rounded-sm overflow-hidden mb-4 shadow-inner">
-                <Watch3DInteractive
-                  dialType="blue"
-                  strapType="cognac"
-                  viewMode={atelierAngle}
-                  autoRotate={true}
-                  showControls={false}
-                  className="w-full h-full"
-                />
+                <Watch3DInteractive dialType="blue" strapType="cognac" viewMode={atelierAngle} autoRotate={true} showControls={false} className="w-full h-full"/>
 
                 <div className="absolute top-2.5 left-2.5 pointer-events-none">
                   <span className="text-[8px] uppercase tracking-[0.2em] text-zinc-400 font-mono bg-black/60 px-2 py-0.5 border border-white/10">
@@ -66,36 +54,16 @@ export function ProvenanceSection() {
 
               {/* 3D Atelier Perspective Selector */}
               <div className="grid grid-cols-4 gap-1.5 mb-5 p-1 bg-white/[0.03] border border-white/10 rounded-full">
-                <button
-                  onClick={() => handleAngleChange("wrist")}
-                  className={`py-1 text-[8.5px] uppercase tracking-[0.16em] transition-all cursor-pointer rounded-full text-center ${
-                    atelierAngle === "wrist" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"
-                  }`}
-                >
+                <button onClick={() => handleAngleChange("wrist")} className={`py-1 text-[8.5px] uppercase tracking-[0.16em] transition-all cursor-pointer rounded-full text-center ${atelierAngle === "wrist" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"}`}>
                   Gallery
                 </button>
-                <button
-                  onClick={() => handleAngleChange("macro")}
-                  className={`py-1 text-[8.5px] uppercase tracking-[0.16em] transition-all cursor-pointer rounded-full text-center ${
-                    atelierAngle === "macro" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"
-                  }`}
-                >
+                <button onClick={() => handleAngleChange("macro")} className={`py-1 text-[8.5px] uppercase tracking-[0.16em] transition-all cursor-pointer rounded-full text-center ${atelierAngle === "macro" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"}`}>
                   Dial
                 </button>
-                <button
-                  onClick={() => handleAngleChange("profile")}
-                  className={`py-1 text-[8.5px] uppercase tracking-[0.16em] transition-all cursor-pointer rounded-full text-center ${
-                    atelierAngle === "profile" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"
-                  }`}
-                >
+                <button onClick={() => handleAngleChange("profile")} className={`py-1 text-[8.5px] uppercase tracking-[0.16em] transition-all cursor-pointer rounded-full text-center ${atelierAngle === "profile" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"}`}>
                   316L Flank
                 </button>
-                <button
-                  onClick={() => handleAngleChange("caseback")}
-                  className={`py-1 text-[8.5px] uppercase tracking-[0.16em] transition-all cursor-pointer rounded-full text-center ${
-                    atelierAngle === "caseback" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"
-                  }`}
-                >
+                <button onClick={() => handleAngleChange("caseback")} className={`py-1 text-[8.5px] uppercase tracking-[0.16em] transition-all cursor-pointer rounded-full text-center ${atelierAngle === "caseback" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"}`}>
                   Glashütte
                 </button>
               </div>
@@ -112,7 +80,7 @@ export function ProvenanceSection() {
           <div className="lg:col-span-7 space-y-8 lg:pl-6">
             <div>
               <div className="flex items-center space-x-3 mb-3">
-                <span className="w-6 h-[1px] bg-white/40" />
+                <span className="w-6 h-[1px] bg-white/40"/>
                 <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-zinc-400">
                   04 · PROVENANCE
                 </span>
@@ -139,25 +107,25 @@ export function ProvenanceSection() {
             {/* Checklist of Heritage Standards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-white/10 text-xs">
               <div className="flex items-start space-x-3">
-                <CheckCircle2 size={15} className="text-white shrink-0 mt-0.5" />
+                <CheckCircle2 size={15} className="text-white shrink-0 mt-0.5"/>
                 <span className="text-zinc-300">
                   Zero tool strap swap with patented dual spring-bar levers.
                 </span>
               </div>
               <div className="flex items-start space-x-3">
-                <CheckCircle2 size={15} className="text-white shrink-0 mt-0.5" />
+                <CheckCircle2 size={15} className="text-white shrink-0 mt-0.5"/>
                 <span className="text-zinc-300">
                   Hand-turned Clous de Paris guilloché by French master engravers.
                 </span>
               </div>
               <div className="flex items-start space-x-3">
-                <CheckCircle2 size={15} className="text-white shrink-0 mt-0.5" />
+                <CheckCircle2 size={15} className="text-white shrink-0 mt-0.5"/>
                 <span className="text-zinc-300">
                   52-hour chronometer reserve adjusted across 5 positions.
                 </span>
               </div>
               <div className="flex items-start space-x-3">
-                <CheckCircle2 size={15} className="text-white shrink-0 mt-0.5" />
+                <CheckCircle2 size={15} className="text-white shrink-0 mt-0.5"/>
                 <span className="text-zinc-300">
                   Individually numbered caseback with archival ledger entry.
                 </span>
@@ -169,6 +137,5 @@ export function ProvenanceSection() {
         </div>
 
       </div>
-    </section>
-  );
+    </section>);
 }

@@ -8,7 +8,7 @@ export function Footer() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = (e) => {
     e.preventDefault();
     if (!email) return;
     soundManager.playSoftClick();
@@ -96,3 +96,4 @@ export function Footer() {
     </footer>
   );
 }
+export default Footer;

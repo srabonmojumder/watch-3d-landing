@@ -1,0 +1,25 @@
+// ==========================================================================
+// BASE TYPOGRAPHY
+// ==========================================================================
+
+@use "../abstracts/tokens" as *;
+
+.font-sans {
+  font-family: $font-sans;
+}
+
+.font-mono {
+  font-family: $font-mono;
+}
+
+.font-serif {
+  font-family: $font-serif;
+}
+
+.tracking-luxury {
+  letter-spacing: 0.35em;
+}
+
+.tracking-wide {
+  letter-spacing: 0.15em;
+}

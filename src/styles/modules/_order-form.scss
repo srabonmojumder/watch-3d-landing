@@ -1,0 +1,8 @@
+@use "../abstracts/tokens" as *;
+
+.order-section {
+  position: relative;
+  width: 100%;
+  background-color: $primary-black;
+  border-top: 1px solid $border-subtle;
+}

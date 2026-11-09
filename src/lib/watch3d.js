@@ -1,32 +1,12 @@
 import * as THREE from "three";
 
-export type DialType = "blue" | "silver" | "slate" | "salmon" | "noir";
-export type StrapType = "cognac" | "blue" | "steel" | "black";
-
-export interface Watch3DComponents {
-  root: THREE.Group;
-  caseMesh: THREE.Mesh;
-  bezelMesh: THREE.Mesh;
-  crystalMesh: THREE.Mesh;
-  dialMesh: THREE.Mesh;
-  hourHand: THREE.Group;
-  minuteHand: THREE.Group;
-  secondHand: THREE.Group;
-  balanceWheel: THREE.Group;
-  strapGroup: THREE.Group;
-  crownMesh: THREE.Mesh;
-  updateDial: (dial: DialType) => void;
-  updateStrap: (strap: StrapType) => void;
-  tick: (time: number, isWinding?: boolean) => void;
-}
-
 // Generate procedural high-resolution textures for dials (1024x1024)
-function createDialTexture(dialType: DialType): THREE.CanvasTexture {
+function createDialTexture(dialType) {
   const size = 1024;
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
-  const ctx = canvas.getContext("2d")!;
+  const ctx = canvas.getContext("2d");
   const cx = size / 2;
   const cy = size / 2;
   const r = size * 0.49;
@@ -242,12 +222,12 @@ function createDialTexture(dialType: DialType): THREE.CanvasTexture {
 }
 
 // Generate exhibition caseback movement texture (Glashütte lines & perlage)
-function createMovementTexture(): THREE.CanvasTexture {
+function createMovementTexture() {
   const size = 1024;
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
-  const ctx = canvas.getContext("2d")!;
+  const ctx = canvas.getContext("2d");
   const cx = size / 2;
   const cy = size / 2;
   const r = size * 0.48;
@@ -321,13 +301,13 @@ function createMovementTexture(): THREE.CanvasTexture {
 }
 
 // Generate realistic leather strap bump texture with saddle stitches
-function createLeatherTexture(colorHex: string): THREE.CanvasTexture {
+function createLeatherTexture(colorHex) {
   const w = 512;
   const h = 1024;
   const canvas = document.createElement("canvas");
   canvas.width = w;
   canvas.height = h;
-  const ctx = canvas.getContext("2d")!;
+  const ctx = canvas.getContext("2d");
 
   ctx.fillStyle = colorHex;
   ctx.fillRect(0, 0, w, h);
@@ -366,15 +346,10 @@ function createLeatherTexture(colorHex: string): THREE.CanvasTexture {
   return texture;
 }
 
-export function build3DWatch(
-  initialDial: DialType = "blue",
-  initialStrap: StrapType = "cognac"
-): Watch3DComponents {
+export function build3DWatch(initialDial = "blue", initialStrap = "cognac") {
   const root = new THREE.Group();
 
-  // -------------------------------------------------------------
   // 1. MATERIALS (Physically Based Rendering - PBR)
-  // -------------------------------------------------------------
   const steelMaterial = new THREE.MeshStandardMaterial({
     color: 0xe4e4e7,
     metalness: 0.90,
@@ -387,7 +362,6 @@ export function build3DWatch(
     roughness: 0.10,
   });
 
-  // Clean, high-performance optical sapphire crystal
   const sapphireMaterial = new THREE.MeshStandardMaterial({
     color: 0xf0f9ff,
     transparent: true,
@@ -397,7 +371,7 @@ export function build3DWatch(
   });
 
   const bluedSteelMaterial = new THREE.MeshStandardMaterial({
-    color: 0x1d4ed8, // Vibrant flame-blued leaf hands
+    color: 0x1d4ed8,
     metalness: 0.85,
     roughness: 0.15,
   });
@@ -408,13 +382,10 @@ export function build3DWatch(
     roughness: 0.05,
   });
 
-  // -------------------------------------------------------------
-  // 2. 316L STAINLESS STEEL CASE (Front normal facing +Z)
-  // -------------------------------------------------------------
-  const caseRadius = 2.4; // Proportionate units (~39mm)
+  // 2. 316L STAINLESS STEEL CASE
+  const caseRadius = 2.4;
   const caseHeight = 0.55;
 
-  // Case body aligned along Z axis (z extends from -0.275 to +0.275)
   const caseGeo = new THREE.CylinderGeometry(caseRadius, caseRadius * 0.96, caseHeight, 64);
   caseGeo.rotateX(Math.PI / 2);
   const caseMesh = new THREE.Mesh(caseGeo, steelMaterial);
@@ -422,13 +393,11 @@ export function build3DWatch(
   caseMesh.receiveShadow = true;
   root.add(caseMesh);
 
-  // Stepped Mirror-Polished Coin-Edge Bezel
   const bezelGeo = new THREE.TorusGeometry(caseRadius * 0.98, 0.09, 16, 64);
   const bezelMesh = new THREE.Mesh(bezelGeo, polishedSteelMaterial);
   bezelMesh.position.z = 0.28;
   root.add(bezelMesh);
 
-  // 4 Ergonomic Curved Lugs (Protruding at 10, 2, 4, 8 o'clock)
   const lugGeo = new THREE.BoxGeometry(0.32, 1.1, 0.42);
   const lugAngles = [
     Math.PI * 0.28,
@@ -446,16 +415,13 @@ export function build3DWatch(
     root.add(lug);
   });
 
-  // Knurled Winding Crown at 3 o'clock (+X axis)
   const crownGeo = new THREE.CylinderGeometry(0.24, 0.24, 0.32, 24);
   crownGeo.rotateZ(Math.PI / 2);
   const crownMesh = new THREE.Mesh(crownGeo, polishedSteelMaterial);
   crownMesh.position.set(caseRadius + 0.20, 0, 0);
   root.add(crownMesh);
 
-  // -------------------------------------------------------------
-  // 3. DIAL & SAPPHIRE CRYSTAL (Facing +Z directly toward camera)
-  // -------------------------------------------------------------
+  // 3. DIAL & SAPPHIRE CRYSTAL
   let currentDialTexture = createDialTexture(initialDial);
   const dialMaterial = new THREE.MeshStandardMaterial({
     map: currentDialTexture,
@@ -463,13 +429,11 @@ export function build3DWatch(
     metalness: 0.18,
   });
 
-  // Dial positioned slightly in front of cylinder cap (z = 0.282)
   const dialGeo = new THREE.CircleGeometry(caseRadius * 0.91, 64);
   const dialMesh = new THREE.Mesh(dialGeo, dialMaterial);
   dialMesh.position.z = 0.282;
   root.add(dialMesh);
 
-  // 12 Applied 3D Rhodium Hour Markers (z = 0.288)
   for (let i = 0; i < 12; i++) {
     const markerAngle = (i * Math.PI) / 6;
     const isCardinal = i % 3 === 0;
@@ -489,7 +453,6 @@ export function build3DWatch(
     root.add(marker);
   }
 
-  // Curved Double-Domed Sapphire Crystal (z = 0.34)
   const crystalGeo = new THREE.SphereGeometry(
     caseRadius * 1.05,
     64,
@@ -504,19 +467,15 @@ export function build3DWatch(
   crystalMesh.position.z = 0.34;
   root.add(crystalMesh);
 
-  // -------------------------------------------------------------
-  // 4. FLAME-BLUED 3D HANDS (Hour, Minute, Petite Seconde)
-  // -------------------------------------------------------------
+  // 4. FLAME-BLUED 3D HANDS
   const handsCenterZ = 0.298;
 
-  // Center Pinion Cap
   const pinionGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.08, 16);
   pinionGeo.rotateX(Math.PI / 2);
   const pinionMesh = new THREE.Mesh(pinionGeo, polishedSteelMaterial);
   pinionMesh.position.set(0, 0, handsCenterZ + 0.02);
   root.add(pinionMesh);
 
-  // Hour Hand (Leaf shaped, rotating around Z)
   const hourHand = new THREE.Group();
   hourHand.position.set(0, 0, handsCenterZ);
   const hourGeo = new THREE.BoxGeometry(0.08, 1.1, 0.02);
@@ -525,7 +484,6 @@ export function build3DWatch(
   hourHand.add(hourMesh);
   root.add(hourHand);
 
-  // Minute Hand (Extended Leaf, rotating around Z)
   const minuteHand = new THREE.Group();
   minuteHand.position.set(0, 0, handsCenterZ + 0.015);
   const minuteGeo = new THREE.BoxGeometry(0.06, 1.6, 0.02);
@@ -534,7 +492,6 @@ export function build3DWatch(
   minuteHand.add(minuteMesh);
   root.add(minuteHand);
 
-  // Sub-seconds Hand at 6 o'clock (-Y axis)
   const secondHand = new THREE.Group();
   const subY = -caseRadius * 0.44;
   secondHand.position.set(0, subY, handsCenterZ);
@@ -544,9 +501,7 @@ export function build3DWatch(
   secondHand.add(secondMesh);
   root.add(secondHand);
 
-  // -------------------------------------------------------------
-  // 5. EXHIBITION CASEBACK & CALIBRE V-101 MOVEMENT (Turn 180° around Y)
-  // -------------------------------------------------------------
+  // 5. EXHIBITION CASEBACK & CALIBRE V-101 MOVEMENT
   const movementTexture = createMovementTexture();
   const movementMaterial = new THREE.MeshStandardMaterial({
     map: movementTexture,
@@ -555,19 +510,17 @@ export function build3DWatch(
   });
 
   const movementGeo = new THREE.CircleGeometry(caseRadius * 0.85, 48);
-  movementGeo.rotateY(Math.PI); // Facing -Z
+  movementGeo.rotateY(Math.PI);
   const movementMesh = new THREE.Mesh(movementGeo, movementMaterial);
   movementMesh.position.z = -0.282;
   root.add(movementMesh);
 
-  // Caseback Sapphire Crystal
   const backCrystalGeo = new THREE.CircleGeometry(caseRadius * 0.86, 48);
   backCrystalGeo.rotateY(Math.PI);
   const backCrystalMesh = new THREE.Mesh(backCrystalGeo, sapphireMaterial);
   backCrystalMesh.position.z = -0.286;
   root.add(backCrystalMesh);
 
-  // Rotating Screw Balance Wheel
   const balanceWheel = new THREE.Group();
   balanceWheel.position.set(-caseRadius * 0.35, -caseRadius * 0.2, -0.278);
   const balanceRimGeo = new THREE.TorusGeometry(0.55, 0.03, 12, 32);
@@ -580,9 +533,7 @@ export function build3DWatch(
   balanceWheel.add(balanceRim);
   root.add(balanceWheel);
 
-  // -------------------------------------------------------------
-  // 6. QUICK-RELEASE INTERCHANGEABLE STRAPS (Top at +Y, Bottom at -Y)
-  // -------------------------------------------------------------
+  // 6. QUICK-RELEASE INTERCHANGEABLE STRAPS
   const strapGroup = new THREE.Group();
   root.add(strapGroup);
 
@@ -590,9 +541,9 @@ export function build3DWatch(
   const strapLength = 3.6;
   const strapThick = 0.22;
 
-  let currentStrapMat: THREE.MeshStandardMaterial;
+  let currentStrapMat;
 
-  const buildStrapMeshes = (type: StrapType) => {
+  const buildStrapMeshes = (type) => {
     while (strapGroup.children.length > 0) {
       strapGroup.remove(strapGroup.children[0]);
     }
@@ -619,7 +570,6 @@ export function build3DWatch(
         metalness: 0.1,
       });
     } else {
-      // Milanese 316L Stainless Steel Mesh
       currentStrapMat = new THREE.MeshStandardMaterial({
         color: 0xd4d4d8,
         metalness: 0.95,
@@ -627,23 +577,20 @@ export function build3DWatch(
       });
     }
 
-    // Top Strap (12 o'clock, +Y)
     const topStrapGeo = new THREE.BoxGeometry(strapWidth, strapLength, strapThick);
     const topStrap = new THREE.Mesh(topStrapGeo, currentStrapMat);
     topStrap.position.set(0, caseRadius + strapLength / 2 - 0.25, -0.15);
-    topStrap.rotation.x = -0.18; // Curves back around the wrist
+    topStrap.rotation.x = -0.18;
     topStrap.castShadow = true;
     strapGroup.add(topStrap);
 
-    // Bottom Strap (6 o'clock, -Y)
     const bottomStrapGeo = new THREE.BoxGeometry(strapWidth, strapLength * 1.15, strapThick);
     const bottomStrap = new THREE.Mesh(bottomStrapGeo, currentStrapMat);
     bottomStrap.position.set(0, -caseRadius - (strapLength * 1.15) / 2 + 0.25, -0.15);
-    bottomStrap.rotation.x = 0.18; // Curves back around the wrist
+    bottomStrap.rotation.x = 0.18;
     bottomStrap.castShadow = true;
     strapGroup.add(bottomStrap);
 
-    // 316L Steel Pin Buckle on bottom strap
     const buckleGeo = new THREE.TorusGeometry(strapWidth * 0.55, 0.06, 12, 24);
     const buckleMesh = new THREE.Mesh(buckleGeo, polishedSteelMaterial);
     buckleMesh.position.set(0, -caseRadius - strapLength * 1.1, -0.12);
@@ -652,34 +599,26 @@ export function build3DWatch(
 
   buildStrapMeshes(initialStrap);
 
-  // Dynamic Dial Switcher
-  const updateDial = (dial: DialType) => {
+  const updateDial = (dial) => {
     currentDialTexture.dispose();
     currentDialTexture = createDialTexture(dial);
     dialMaterial.map = currentDialTexture;
     dialMaterial.needsUpdate = true;
   };
 
-  // Dynamic Strap Switcher
-  const updateStrap = (strap: StrapType) => {
+  const updateStrap = (strap) => {
     buildStrapMeshes(strap);
   };
 
-  // Real-time mechanical tick & kinetic winding animation
-  const tick = (time: number, isWinding: boolean = false) => {
-    // 28,800 vph (4 Hz) balance wheel harmonic oscillation (spins with extra surge when winding)
+  const tick = (time, isWinding = false) => {
     const speed = isWinding ? 45 : 25;
     const balanceOsc = Math.sin(time * speed) * (isWinding ? 1.6 : 1.2);
     balanceWheel.rotation.z = balanceOsc;
 
-    // Smooth second hand progression
     secondHand.rotation.z = -time * (isWinding ? 2.5 : 1.2);
-
-    // Minute and Hour hand progression
     minuteHand.rotation.z = -time * 0.1;
     hourHand.rotation.z = -time * 0.008 - Math.PI * 0.35;
 
-    // Crown spin when actively winding
     if (isWinding) {
       crownMesh.rotation.x += 0.25;
     }

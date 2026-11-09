@@ -1,13 +1,15 @@
 // Web Audio API synthesizer for luxury acoustic feedback and concierge bell chime
 
 class AudioEngine {
-  private ctx: AudioContext | null = null;
-  private isMuted: boolean = false;
+  constructor() {
+    this.ctx = null;
+    this.isMuted = false;
+  }
 
-  private initContext() {
+  initContext() {
     if (typeof window === "undefined") return null;
     if (!this.ctx) {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) {
         this.ctx = new AudioCtx();
       }
@@ -18,16 +20,16 @@ class AudioEngine {
     return this.ctx;
   }
 
-  public setMuted(muted: boolean) {
+  setMuted(muted) {
     this.isMuted = muted;
   }
 
-  public getMuted(): boolean {
+  getMuted() {
     return this.isMuted;
   }
 
   // Authentic Parisian concierge desk bell chime
-  public playConciergeBell() {
+  playConciergeBell() {
     if (this.isMuted) return;
     const ctx = this.initContext();
     if (!ctx) return;
@@ -51,7 +53,6 @@ class AudioEngine {
       osc.type = "sine";
       osc.frequency.setValueAtTime(freq, now);
 
-      // Strike transient with exponential decay
       gainNode.gain.setValueAtTime(0.0001, now);
       gainNode.gain.exponentialRampToValueAtTime(targetGain, now + 0.004);
       gainNode.gain.exponentialRampToValueAtTime(0.0001, now + decay);
@@ -65,7 +66,7 @@ class AudioEngine {
   }
 
   // Delicate watch winding mechanical click
-  public playWindingClick() {
+  playWindingClick() {
     if (this.isMuted) return;
     const ctx = this.initContext();
     if (!ctx) return;
@@ -95,7 +96,7 @@ class AudioEngine {
   }
 
   // Soft tactile haptic switch sound for dial/strap selections
-  public playSoftClick() {
+  playSoftClick() {
     if (this.isMuted) return;
     const ctx = this.initContext();
     if (!ctx) return;
@@ -119,7 +120,7 @@ class AudioEngine {
   }
 
   // Calibre V-101 balance wheel escapement tick
-  public playEscapementTick(high: boolean = false) {
+  playEscapementTick(high = false) {
     if (this.isMuted) return;
     const ctx = this.initContext();
     if (!ctx) return;
@@ -148,4 +149,3 @@ class AudioEngine {
 }
 
 export const soundManager = new AudioEngine();
-

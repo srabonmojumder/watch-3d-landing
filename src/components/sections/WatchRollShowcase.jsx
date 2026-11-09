@@ -5,39 +5,14 @@ import * as THREE from "three";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { soundManager } from "@/lib/audio";
-import { build3DWatch, DialType, StrapType, Watch3DComponents } from "@/lib/watch3d";
+import { build3DWatch } from "@/lib/watch3d";
 import { ChevronLeft, ChevronRight, Check, RotateCcw, Box, Compass, Sparkles } from "lucide-react";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-interface WatchRollShowcaseProps {
-  onSelectDialForBooking: (dialName: string) => void;
-}
-
-export interface HorologicalEdition {
-  id: string;
-  editionNumber: string;
-  name: string;
-  subtitle: string;
-  dialType: DialType;
-  strapType: StrapType;
-  finish: string;
-  caseDesc: string;
-  price: string;
-  editionTag: string;
-  colorDot: string;
-  description: string;
-  specs: {
-    calibre: string;
-    vibration: string;
-    powerReserve: string;
-    dimensions: string;
-  };
-}
-
-export const EDITIONS: HorologicalEdition[] = [
+export const EDITIONS = [
   {
     id: "silver-pure",
     editionNumber: "01 / 06",
@@ -166,24 +141,24 @@ export const EDITIONS: HorologicalEdition[] = [
   },
 ];
 
-export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseProps) {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const mountRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<ScrollTrigger | null>(null);
+export function WatchRollShowcase({ onSelectDialForBooking }) {
+  const sectionRef = useRef(null);
+  const mountRef = useRef(null);
+  const triggerRef = useRef(null);
 
   // Active edition index
-  const [activeIndex, setActiveIndex] = useState<number>(0);
-  const [scrollFraction, setScrollFraction] = useState<number>(0);
-  const [viewAngle, setViewAngle] = useState<"dial" | "wrist" | "profile" | "calibre">("wrist");
-  const [isOrbiting, setIsOrbiting] = useState<boolean>(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [scrollFraction, setScrollFraction] = useState(0);
+  const [viewAngle, setViewAngle] = useState("wrist");
+  const [isOrbiting, setIsOrbiting] = useState(false);
 
   // 3D references
-  const watchesRef = useRef<Watch3DComponents[]>([]);
-  const targetScrubRef = useRef<number>(0);
-  const currentScrubRef = useRef<number>(0);
+  const watchesRef = useRef([]);
+  const targetScrubRef = useRef(0);
+  const currentScrubRef = useRef(0);
 
   // Mouse drag orbit state for the active watch
-  const isDraggingRef = useRef<boolean>(false);
+  const isDraggingRef = useRef(false);
   const prevMouseRef = useRef({ x: 0, y: 0 });
   const dragRotRef = useRef({ x: 0.16, y: -0.22 });
   const targetDragRotRef = useRef({ x: 0.16, y: -0.22 });
@@ -195,14 +170,14 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
     } else if (viewAngle === "wrist") {
       targetDragRotRef.current = { x: 0.18, y: -0.25 };
     } else if (viewAngle === "profile") {
-      targetDragRotRef.current = { x: 0.02, y: Math.PI * 0.48 }; // 9.8mm slim profile
+      targetDragRotRef.current = { x: 0.02, y: Math.PI * 0.48 };
     } else if (viewAngle === "calibre") {
-      targetDragRotRef.current = { x: 0.0, y: Math.PI }; // 180° exhibition caseback
+      targetDragRotRef.current = { x: 0.0, y: Math.PI };
     }
   }, [viewAngle]);
 
   // Jump to specific edition
-  const jumpToEdition = (index: number) => {
+  const jumpToEdition = (index) => {
     soundManager.playSoftClick();
     if (!triggerRef.current) return;
     const progress = index / (EDITIONS.length - 1);
@@ -281,7 +256,7 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
       triggerRef.current = ScrollTrigger.create({
         trigger: sectionRef.current,
         start: "top top",
-        end: `+=${(EDITIONS.length - 1) * 90}%`, // ~450% scroll distance for buttery pacing
+        end: `+=${(EDITIONS.length - 1) * 90}%`,
         pin: true,
         scrub: 0.6,
         anticipatePin: 1,
@@ -299,13 +274,13 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
     }, sectionRef);
 
     // 6. Interactive Mouse & Touch Drag Controls for 360° Orbit
-    const onPointerDown = (e: PointerEvent) => {
+    const onPointerDown = (e) => {
       isDraggingRef.current = true;
       setIsOrbiting(true);
       prevMouseRef.current = { x: e.clientX, y: e.clientY };
     };
 
-    const onPointerMove = (e: PointerEvent) => {
+    const onPointerMove = (e) => {
       if (!isDraggingRef.current) return;
       const deltaX = e.clientX - prevMouseRef.current.x;
       const deltaY = e.clientY - prevMouseRef.current.y;
@@ -314,7 +289,6 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
       targetDragRotRef.current.y += deltaX * 0.009;
       targetDragRotRef.current.x += deltaY * 0.009;
 
-      // Clamp X tilt to prevent over-inversion
       targetDragRotRef.current.x = Math.max(-Math.PI * 0.45, Math.min(Math.PI * 0.45, targetDragRotRef.current.x));
     };
 
@@ -328,21 +302,18 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
     window.addEventListener("pointerup", onPointerUp);
 
     // 7. Animation Loop with continuous 3D carousel transformations
-    let animId: number;
+    let animId;
     let clock = new THREE.Clock();
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
       const time = clock.getElapsedTime();
 
-      // Smooth lerp for horizontal scrub momentum
       currentScrubRef.current += (targetScrubRef.current - currentScrubRef.current) * 0.12;
 
-      // Smooth lerp for user drag rotation
       dragRotRef.current.x += (targetDragRotRef.current.x - dragRotRef.current.x) * 0.1;
       dragRotRef.current.y += (targetDragRotRef.current.y - dragRotRef.current.y) * 0.1;
 
-      // Position each watch in the 3D Horological Carousel
       const isMobile = window.innerWidth < 768;
       const spacing = isMobile ? 3.8 : 4.6;
 
@@ -350,23 +321,19 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
         const offset = i - currentScrubRef.current;
         const absOffset = Math.abs(offset);
 
-        // Position in 3D arc: moves along X, curves backward in Z depth
         const x = offset * spacing;
         const z = -Math.pow(absOffset, 1.25) * 2.4;
 
-        // Rotation: inactive watches turn inward toward center; active watch takes user drag
         const inwardRotY = -offset * 0.38;
         const rotY = inwardRotY + (absOffset < 0.8 ? dragRotRef.current.y * (1 - absOffset * 0.8) : 0);
         const rotX = dragRotRef.current.x * (1 - Math.min(1, absOffset * 0.7));
 
-        // Scale: active center watch is 1.0, neighbors are gracefully smaller in perspective
         const scale = Math.max(0.38, 1.0 - Math.min(1, absOffset * 0.22));
 
         watch.root.position.set(x, 0, z);
         watch.root.rotation.set(rotX, rotY, 0);
         watch.root.scale.setScalar(scale);
 
-        // Tick balance wheel and smooth mechanical hands
         watch.tick(time);
       });
 
@@ -375,7 +342,6 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
 
     animate();
 
-    // 8. Handle Window Resize
     const handleResize = () => {
       if (!container) return;
       const w = container.clientWidth || window.innerWidth;
@@ -389,7 +355,6 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
     window.addEventListener("resize", handleResize);
     handleResize();
 
-    // Cleanup on unmount
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", handleResize);
@@ -412,13 +377,10 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
       id="dials-roll"
       className="relative w-full h-screen bg-[#040507] text-white overflow-hidden select-none"
     >
-      {/* Background Vignette & Vintage Suede Texture */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(26,17,10,0.45)_0%,rgba(4,5,7,0.98)_70%)] pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(#ffffff_0.6px,transparent_0.6px)] [background-size:24px_24px] opacity-[0.03] pointer-events-none" />
 
-      {/* ------------------------------------------------------------- */}
-      {/* TOP HEADER: TITLE & HOROLOGICAL ARCHIVE TELEMETRY             */}
-      {/* ------------------------------------------------------------- */}
+      {/* TOP HEADER */}
       <div className="absolute top-0 left-0 right-0 z-20 px-6 sm:px-12 pt-8 sm:pt-10 flex items-start justify-between pointer-events-none">
         <div>
           <div className="flex items-center space-x-2.5 mb-2">
@@ -446,7 +408,6 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
             </span>
           </div>
 
-          {/* Prev / Next Step Buttons */}
           <div className="flex items-center space-x-2">
             <button
               onClick={handlePrev}
@@ -476,9 +437,7 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
         </div>
       </div>
 
-      {/* ------------------------------------------------------------- */}
-      {/* FULL-SCREEN 3D WEBGL TIMEPIECE STAGE                          */}
-      {/* ------------------------------------------------------------- */}
+      {/* FULL-SCREEN 3D WEBGL TIMEPIECE STAGE */}
       <div
         ref={mountRef}
         className="absolute inset-0 z-10 w-full h-full cursor-grab active:cursor-grabbing"
@@ -490,9 +449,7 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
         <span>{isOrbiting ? "Orbiting Active Timepiece" : "Drag to orbit 360° · Scroll to navigate"}</span>
       </div>
 
-      {/* ------------------------------------------------------------- */}
-      {/* 3D PERSPECTIVE ANGLE CONTROLLER (WRIST, MACRO, PROFILE, BACK) */}
-      {/* ------------------------------------------------------------- */}
+      {/* 3D PERSPECTIVE ANGLE CONTROLLER */}
       <div className="absolute left-6 sm:left-12 top-1/2 -translate-y-1/2 z-20 flex flex-col space-y-2 pointer-events-auto">
         <span className="text-[8.5px] font-mono uppercase tracking-[0.25em] text-zinc-400 mb-1">
           3D Perspective
@@ -543,9 +500,7 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
         </button>
       </div>
 
-      {/* ------------------------------------------------------------- */}
-      {/* SYNCHRONIZED METADATA CARD & ORDER CTA (BOTTOM-RIGHT)         */}
-      {/* ------------------------------------------------------------- */}
+      {/* SYNCHRONIZED METADATA CARD & ORDER CTA */}
       <div className="absolute right-6 sm:right-12 bottom-24 sm:bottom-28 z-20 max-w-sm w-full bg-[#0a0a0c]/85 backdrop-blur-xl border border-white/15 p-5 sm:p-6 shadow-[0_20px_60px_rgba(0,0,0,0.9)] pointer-events-auto">
         <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-3">
           <div className="flex items-center space-x-2">
@@ -573,7 +528,6 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
           {activeEdition.description}
         </p>
 
-        {/* Micro Specs Grid */}
         <div className="grid grid-cols-2 gap-2 py-3 border-t border-b border-white/10 text-[9px] font-mono text-zinc-400 mb-4">
           <div>
             <span className="text-zinc-400 block">Calibre</span>
@@ -585,7 +539,6 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
           </div>
         </div>
 
-        {/* CTA Button: Select & Jump to Order Form */}
         <button
           onClick={() => onSelectDialForBooking(activeEdition.dialType)}
           className="w-full py-3 px-4 bg-white text-black text-[10px] font-medium uppercase tracking-[0.22em] hover:bg-zinc-200 transition-all cursor-pointer shadow-lg flex items-center justify-center space-x-2 active:scale-[0.98]"
@@ -595,11 +548,8 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
         </button>
       </div>
 
-      {/* ------------------------------------------------------------- */}
-      {/* BOTTOM CAROUSEL TRACK: 6 EDITION TABS & CONTINUOUS SCRUB BAR   */}
-      {/* ------------------------------------------------------------- */}
+      {/* BOTTOM CAROUSEL TRACK */}
       <div className="absolute bottom-4 left-6 right-6 sm:left-12 sm:right-12 z-20 pointer-events-auto">
-        {/* Progress Line */}
         <div className="w-full h-[2px] bg-white/10 relative mb-3 overflow-hidden rounded-full">
           <div
             className="h-full bg-gradient-to-r from-amber-400 to-white transition-all duration-150"
@@ -607,7 +557,6 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
           />
         </div>
 
-        {/* 6 Clickable Edition Tabs */}
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {EDITIONS.map((ed, idx) => {
             const isSelected = activeIndex === idx;
@@ -641,3 +590,4 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
     </section>
   );
 }
+export default WatchRollShowcase;

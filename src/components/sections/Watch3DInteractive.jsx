@@ -2,19 +2,8 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { build3DWatch, DialType, StrapType, Watch3DComponents } from "@/lib/watch3d";
+import { build3DWatch } from "@/lib/watch3d";
 import { RotateCcw, Sparkles } from "lucide-react";
-
-interface Watch3DInteractiveProps {
-  dialType?: DialType;
-  strapType?: StrapType;
-  viewMode?: "wrist" | "macro" | "caseback" | "profile";
-  scrollProgress?: number;
-  autoRotate?: boolean;
-  showControls?: boolean;
-  isWinding?: boolean;
-  className?: string;
-}
 
 export function Watch3DInteractive({
   dialType = "blue",
@@ -25,10 +14,10 @@ export function Watch3DInteractive({
   showControls = true,
   isWinding = false,
   className = "",
-}: Watch3DInteractiveProps) {
-  const mountRef = useRef<HTMLDivElement>(null);
-  const watchRef = useRef<Watch3DComponents | null>(null);
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+}) {
+  const mountRef = useRef(null);
+  const watchRef = useRef(null);
+  const rendererRef = useRef(null);
 
   // Interaction state
   const isDraggingRef = useRef(false);
@@ -65,7 +54,7 @@ export function Watch3DInteractive({
       const sp = Math.max(0, Math.min(1, scrollProgress));
       targetRotRef.current.x = 0.28 - sp * 0.28;
       targetRotRef.current.y = -0.35 + sp * 0.35;
-      targetZoomRef.current = 13.2 - sp * 6.8; // sp=0: 13.2 (full watch, elegant proportion); sp=1: 6.4 (macro dial)
+      targetZoomRef.current = 13.2 - sp * 6.8;
     } else {
       if (viewMode === "wrist") {
         targetRotRef.current = { x: 0.18, y: -0.22 };
@@ -133,19 +122,17 @@ export function Watch3DInteractive({
     scene.add(ambientLight);
 
     // 4. Build 3D Watch Model
-    const watch = build3DWatch();
-    watch.updateDial(dialType);
-    watch.updateStrap(strapType);
+    const watch = build3DWatch(dialType, strapType);
     watchRef.current = watch;
     scene.add(watch.root);
 
     // 5. Mouse / Touch Orbit Controls
-    const handleMouseDown = (e: MouseEvent) => {
+    const handleMouseDown = (e) => {
       isDraggingRef.current = true;
       prevMouseRef.current = { x: e.clientX, y: e.clientY };
     };
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMouseMove = (e) => {
       if (isDraggingRef.current) {
         const deltaX = (e.clientX - prevMouseRef.current.x) * 0.008;
         const deltaY = (e.clientY - prevMouseRef.current.y) * 0.008;
@@ -155,7 +142,6 @@ export function Watch3DInteractive({
 
         prevMouseRef.current = { x: e.clientX, y: e.clientY };
       } else {
-        // Subtle mouse parallax tilt when hovering
         const rect = container.getBoundingClientRect();
         const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
         const ny = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
@@ -168,15 +154,14 @@ export function Watch3DInteractive({
       isDraggingRef.current = false;
     };
 
-    // Touch support for mobile devices
-    const handleTouchStart = (e: TouchEvent) => {
+    const handleTouchStart = (e) => {
       if (e.touches.length === 1) {
         isDraggingRef.current = true;
         prevMouseRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       }
     };
 
-    const handleTouchMove = (e: TouchEvent) => {
+    const handleTouchMove = (e) => {
       if (isDraggingRef.current && e.touches.length === 1) {
         const deltaX = (e.touches[0].clientX - prevMouseRef.current.x) * 0.008;
         const deltaY = (e.touches[0].clientY - prevMouseRef.current.y) * 0.008;
@@ -212,7 +197,7 @@ export function Watch3DInteractive({
     window.addEventListener("resize", handleResize);
 
     // 7. Render Loop with smooth inertia damping
-    let animationFrameId: number;
+    let animationFrameId;
     let clock = new THREE.Clock();
 
     const animate = () => {
@@ -220,11 +205,9 @@ export function Watch3DInteractive({
 
       const elapsedTime = clock.getElapsedTime();
 
-      // Smooth inertia rotation
       rotRef.current.x += (targetRotRef.current.x - rotRef.current.x) * 0.12;
       rotRef.current.y += (targetRotRef.current.y - rotRef.current.y) * 0.12;
 
-      // Auto gentle hover rotation when idle
       if (!isDraggingRef.current && autoRotate) {
         const floatX = Math.sin(elapsedTime * 0.7) * 0.022;
         const floatY = Math.cos(elapsedTime * 0.5) * 0.032;
@@ -235,11 +218,9 @@ export function Watch3DInteractive({
         watch.root.rotation.y = rotRef.current.y;
       }
 
-      // Smooth camera zoom
       currentZoomRef.current += (targetZoomRef.current - currentZoomRef.current) * 0.08;
       camera.position.z = currentZoomRef.current;
 
-      // Mechanical tick & kinetic winding
       watch.tick(elapsedTime, isWindingRef.current);
 
       renderer.render(scene, camera);
@@ -275,10 +256,8 @@ export function Watch3DInteractive({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* 3D WebGL Canvas Mounting Point */}
       <div ref={mountRef} className="w-full h-full block" />
 
-      {/* Luxury Horology 3D Interactive Badges */}
       {showControls && (
         <>
           <div className="absolute top-4 left-4 z-20 pointer-events-none flex items-center space-x-2">
@@ -307,4 +286,4 @@ export function Watch3DInteractive({
     </div>
   );
 }
-
+export default Watch3DInteractive;

@@ -4,11 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Menu, X, Volume2, VolumeX } from "lucide-react";
 import { soundManager } from "@/lib/audio";
 
-interface NavbarProps {
-  onOpenBooking: () => void;
-}
-
-export function Navbar({ onOpenBooking }: NavbarProps) {
+export function Navbar({ onOpenBooking }) {
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -36,7 +32,7 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
     }
   };
 
-  const scrollToSection = (id: string) => {
+  const scrollToSection = (id) => {
     setMobileMenuOpen(false);
     const element = document.getElementById(id);
     if (element) {
@@ -109,7 +105,7 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
             </span>
           </div>
 
-          {/* Right action: "Book a fitting" pill button */}
+          {/* Right action: "Order Now" pill button */}
           <div className="flex items-center space-x-4">
             <button
               onClick={toggleSound}
@@ -172,3 +168,4 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
     </>
   );
 }
+export default Navbar;

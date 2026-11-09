@@ -1,45 +1,38 @@
 "use client";
-
 import React, { useState } from "react";
 import { soundManager } from "@/lib/audio";
-import { RotateCw, Sparkles, Compass, Eye } from "lucide-react";
+import { RotateCw } from "lucide-react";
 import { Watch3DInteractive } from "./Watch3DInteractive";
-
 export function MovementSection() {
-  const [powerReserveHours, setPowerReserveHours] = useState<number>(42);
-  const [isWinding, setIsWinding] = useState(false);
-  const [movementAngle, setMovementAngle] = useState<"caseback" | "profile" | "macro">("caseback");
-
-  const handleWind = () => {
-    soundManager.playWindingClick();
-    setIsWinding(true);
-    setPowerReserveHours((prev) => {
-      const next = Math.min(52, prev + 4);
-      return next;
-    });
-
-    setTimeout(() => {
-      setIsWinding(false);
-    }, 600);
-  };
-
-  const handleResetWinding = () => {
-    soundManager.playSoftClick();
-    setPowerReserveHours(12);
-  };
-
-  return (
-    <section id="craftsmanship-movement" className="relative w-full py-28 md:py-36 bg-black border-t border-white/10 px-6 md:px-14 overflow-hidden">
+    const [powerReserveHours, setPowerReserveHours] = useState(42);
+    const [isWinding, setIsWinding] = useState(false);
+    const [movementAngle, setMovementAngle] = useState("caseback");
+    const handleWind = () => {
+        soundManager.playWindingClick();
+        setIsWinding(true);
+        setPowerReserveHours((prev) => {
+            const next = Math.min(52, prev + 4);
+            return next;
+        });
+        setTimeout(() => {
+            setIsWinding(false);
+        }, 600);
+    };
+    const handleResetWinding = () => {
+        soundManager.playSoftClick();
+        setPowerReserveHours(12);
+    };
+    return (<section id="craftsmanship-movement" className="relative w-full py-28 md:py-36 bg-black border-t border-white/10 px-6 md:px-14 overflow-hidden">
       <div className="max-w-7xl mx-auto">
         
         {/* Section Header */}
         <div className="flex flex-col items-center text-center mb-16">
           <div className="flex items-center space-x-3 mb-4">
-            <span className="w-6 h-[1px] bg-white/40" />
+            <span className="w-6 h-[1px] bg-white/40"/>
             <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-zinc-400">
               03 · MECHANICAL ARCHITECTURE
             </span>
-            <span className="w-6 h-[1px] bg-white/40" />
+            <span className="w-6 h-[1px] bg-white/40"/>
           </div>
 
           <h2 className="font-sans text-3xl sm:text-4xl md:text-5xl font-light text-white tracking-wide uppercase mb-4">
@@ -100,7 +93,7 @@ export function MovementSection() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-white/10 mb-6 gap-4">
                 <div>
                   <div className="flex items-center space-x-2 text-[9px] font-mono uppercase tracking-[0.3em] text-zinc-400 mb-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"/>
                     <span>Real-time 3D Calibre Studio</span>
                   </div>
                   <h4 className="font-sans text-lg sm:text-xl text-white font-medium uppercase tracking-wide">
@@ -110,34 +103,19 @@ export function MovementSection() {
 
                 {/* 3D Movement Angle Presets */}
                 <div className="flex items-center space-x-1 p-1 bg-white/[0.04] border border-white/10 rounded-full">
-                  <button
-                    onClick={() => { setMovementAngle("caseback"); soundManager.playSoftClick(); }}
-                    className={`px-3 py-1 text-[9.5px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
-                      movementAngle === "caseback"
-                        ? "bg-white text-black font-semibold shadow-sm"
-                        : "text-zinc-400 hover:text-white"
-                    }`}
-                  >
+                  <button onClick={() => { setMovementAngle("caseback"); soundManager.playSoftClick(); }} className={`px-3 py-1 text-[9.5px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${movementAngle === "caseback"
+            ? "bg-white text-black font-semibold shadow-sm"
+            : "text-zinc-400 hover:text-white"}`}>
                     180° Calibre
                   </button>
-                  <button
-                    onClick={() => { setMovementAngle("profile"); soundManager.playSoftClick(); }}
-                    className={`px-3 py-1 text-[9.5px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
-                      movementAngle === "profile"
-                        ? "bg-white text-black font-semibold shadow-sm"
-                        : "text-zinc-400 hover:text-white"
-                    }`}
-                  >
+                  <button onClick={() => { setMovementAngle("profile"); soundManager.playSoftClick(); }} className={`px-3 py-1 text-[9.5px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${movementAngle === "profile"
+            ? "bg-white text-black font-semibold shadow-sm"
+            : "text-zinc-400 hover:text-white"}`}>
                     Crown Angle
                   </button>
-                  <button
-                    onClick={() => { setMovementAngle("macro"); soundManager.playSoftClick(); }}
-                    className={`px-3 py-1 text-[9.5px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
-                      movementAngle === "macro"
-                        ? "bg-white text-black font-semibold shadow-sm"
-                        : "text-zinc-400 hover:text-white"
-                    }`}
-                  >
+                  <button onClick={() => { setMovementAngle("macro"); soundManager.playSoftClick(); }} className={`px-3 py-1 text-[9.5px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${movementAngle === "macro"
+            ? "bg-white text-black font-semibold shadow-sm"
+            : "text-zinc-400 hover:text-white"}`}>
                     Dial Face
                   </button>
                 </div>
@@ -145,15 +123,7 @@ export function MovementSection() {
 
               {/* Real-time 3D WebGL Movement Inspection Stage */}
               <div className="relative w-full aspect-[16/10] bg-gradient-to-b from-[#101216] via-[#090b0e] to-[#040507] border border-white/10 rounded-sm overflow-hidden mb-6 shadow-inner">
-                <Watch3DInteractive
-                  dialType="blue"
-                  strapType="cognac"
-                  viewMode={movementAngle}
-                  isWinding={isWinding}
-                  autoRotate={true}
-                  showControls={false}
-                  className="w-full h-full"
-                />
+                <Watch3DInteractive dialType="blue" strapType="cognac" viewMode={movementAngle} isWinding={isWinding} autoRotate={true} showControls={false} className="w-full h-full"/>
 
                 {/* Floating 3D Micro Telemetry */}
                 <div className="absolute top-3 left-3 pointer-events-none flex items-center space-x-2">
@@ -179,11 +149,8 @@ export function MovementSection() {
                 </div>
 
                 <div className="w-full h-2 bg-black border border-white/10 p-0.5 relative overflow-hidden">
-                  <div
-                    className="h-full bg-white transition-all duration-300 relative"
-                    style={{ width: `${(powerReserveHours / 52) * 100}%` }}
-                  >
-                    <div className="absolute right-0 top-0 bottom-0 w-2 bg-white shadow-[0_0_8px_#fff]" />
+                  <div className="h-full bg-white transition-all duration-300 relative" style={{ width: `${(powerReserveHours / 52) * 100}%` }}>
+                    <div className="absolute right-0 top-0 bottom-0 w-2 bg-white shadow-[0_0_8px_#fff]"/>
                   </div>
                 </div>
 
@@ -205,31 +172,16 @@ export function MovementSection() {
                 </div>
 
                 <div className="flex items-center space-x-3 w-full sm:w-auto">
-                  <button
-                    onClick={handleWind}
-                    disabled={powerReserveHours >= 52}
-                    className={`px-6 py-2.5 text-xs uppercase tracking-[0.25em] font-medium transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg w-full sm:w-auto ${
-                      powerReserveHours >= 52
-                        ? "bg-zinc-900 text-zinc-600 border border-white/5 cursor-not-allowed"
-                        : "bg-white text-black hover:bg-zinc-200 active:scale-95"
-                    }`}
-                  >
-                    <RotateCw
-                      size={13}
-                      className={isWinding ? "animate-spin text-black" : ""}
-                    />
+                  <button onClick={handleWind} disabled={powerReserveHours >= 52} className={`px-6 py-2.5 text-xs uppercase tracking-[0.25em] font-medium transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg w-full sm:w-auto ${powerReserveHours >= 52
+            ? "bg-zinc-900 text-zinc-600 border border-white/5 cursor-not-allowed"
+            : "bg-white text-black hover:bg-zinc-200 active:scale-95"}`}>
+                    <RotateCw size={13} className={isWinding ? "animate-spin text-black" : ""}/>
                     {powerReserveHours >= 52 ? "Fully Wound" : "Wind Crown"}
                   </button>
 
-                  {powerReserveHours >= 52 && (
-                    <button
-                      onClick={handleResetWinding}
-                      className="px-3 py-2.5 text-zinc-400 hover:text-white text-xs border border-white/10 cursor-pointer"
-                      title="Reset tension"
-                    >
+                  {powerReserveHours >= 52 && (<button onClick={handleResetWinding} className="px-3 py-2.5 text-zinc-400 hover:text-white text-xs border border-white/10 cursor-pointer" title="Reset tension">
                       Reset
-                    </button>
-                  )}
+                    </button>)}
                 </div>
               </div>
 
@@ -254,6 +206,5 @@ export function MovementSection() {
 
         </div>
       </div>
-    </section>
-  );
+    </section>);
 }

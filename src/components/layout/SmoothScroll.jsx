@@ -9,19 +9,15 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-export function SmoothScrollProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const lenisRef = useRef<Lenis | null>(null);
+export function SmoothScrollProvider({ children }) {
+  const lenisRef = useRef(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
     const lenis = new Lenis({
       duration: 1.2,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: "vertical",
       gestureOrientation: "vertical",
       smoothWheel: true,
@@ -36,7 +32,7 @@ export function SmoothScrollProvider({
       ScrollTrigger.update();
     });
 
-    const updateTicker = (time: number) => {
+    const updateTicker = (time) => {
       lenis.raf(time * 1000);
     };
 
@@ -52,3 +48,4 @@ export function SmoothScrollProvider({
 
   return <div suppressHydrationWarning className="w-full relative bg-black text-white">{children}</div>;
 }
+export default SmoothScrollProvider;
