@@ -60,10 +60,7 @@ const DIALS: DialVariant[] = [
 export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseProps) {
   const [activeSlot, setActiveSlot] = useState<number>(1); // Default to Slot 2: BLUE
   const [inspectingDial, setInspectingDial] = useState<DialVariant | null>(null);
-
-  const canvasRef0 = useRef<HTMLCanvasElement>(null);
-  const canvasRef1 = useRef<HTMLCanvasElement>(null);
-  const canvasRef2 = useRef<HTMLCanvasElement>(null);
+  const [rollViewMode, setRollViewMode] = useState<"wrist" | "macro" | "caseback" | "profile">("wrist");
 
   // Render high-fidelity canvas for each dial in the watch roll
   const drawWatch = (
@@ -314,11 +311,7 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
     ctx.fill();
   };
 
-  useEffect(() => {
-    drawWatch(canvasRef0.current, DIALS[0]);
-    drawWatch(canvasRef1.current, DIALS[1]);
-    drawWatch(canvasRef2.current, DIALS[2]);
-  }, []);
+
 
   const handleSelectSlot = (idx: number) => {
     if (activeSlot !== idx) {
@@ -409,18 +402,30 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
                 className={`relative group cursor-pointer transition-all duration-500 flex flex-col items-center ${
                   activeSlot === 0
                     ? "scale-105 z-20 opacity-100"
-                    : "scale-95 opacity-35 hover:opacity-75 blur-[0.4px]"
+                    : "scale-95 opacity-50 hover:opacity-85"
                 }`}
               >
-                <div className="w-full aspect-[3/4] relative flex items-center justify-center">
-                  <canvas ref={canvasRef0} className="w-full h-full object-contain" />
+                <div className="w-full aspect-[3/4] relative flex items-center justify-center bg-gradient-to-b from-[#18110a] via-[#100b06] to-[#0a0704] rounded-sm overflow-hidden border border-white/10 shadow-xl">
+                  <Watch3DInteractive
+                    dialType="silver"
+                    strapType="cognac"
+                    viewMode={activeSlot === 0 ? rollViewMode : "wrist"}
+                    autoRotate={activeSlot === 0}
+                    showControls={false}
+                    className="w-full h-full"
+                  />
                   {activeSlot === 0 && (
-                    <div className="absolute inset-0 ring-1 ring-white/30 pointer-events-none" />
+                    <div className="absolute inset-0 ring-1 ring-white/40 pointer-events-none" />
                   )}
+                  <div className="absolute bottom-2 left-2 pointer-events-none">
+                    <span className="text-[8px] uppercase tracking-[0.2em] text-zinc-400 font-mono bg-black/60 px-2 py-0.5 border border-white/10">
+                      3D WebGL
+                    </span>
+                  </div>
                 </div>
 
                 {/* Clean metadata card below each watch */}
-                <div className="w-full mt-4 bg-black/80 border border-white/10 p-4 text-center space-y-1">
+                <div className="w-full mt-4 bg-black/90 border border-white/10 p-4 text-center space-y-1">
                   <span className="text-[9px] font-mono uppercase tracking-[0.25em] text-zinc-400 block">
                     SLOT 1
                   </span>
@@ -440,18 +445,30 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
                 className={`relative group cursor-pointer transition-all duration-500 flex flex-col items-center ${
                   activeSlot === 1
                     ? "scale-105 z-20 opacity-100"
-                    : "scale-95 opacity-35 hover:opacity-75 blur-[0.4px]"
+                    : "scale-95 opacity-50 hover:opacity-85"
                 }`}
               >
-                <div className="w-full aspect-[3/4] relative flex items-center justify-center">
-                  <canvas ref={canvasRef1} className="w-full h-full object-contain" />
+                <div className="w-full aspect-[3/4] relative flex items-center justify-center bg-gradient-to-b from-[#18110a] via-[#100b06] to-[#0a0704] rounded-sm overflow-hidden border border-white/10 shadow-xl">
+                  <Watch3DInteractive
+                    dialType="blue"
+                    strapType="blue"
+                    viewMode={activeSlot === 1 ? rollViewMode : "wrist"}
+                    autoRotate={activeSlot === 1}
+                    showControls={false}
+                    className="w-full h-full"
+                  />
                   {activeSlot === 1 && (
-                    <div className="absolute inset-0 ring-1 ring-white/30 pointer-events-none" />
+                    <div className="absolute inset-0 ring-1 ring-white/40 pointer-events-none" />
                   )}
+                  <div className="absolute bottom-2 left-2 pointer-events-none">
+                    <span className="text-[8px] uppercase tracking-[0.2em] text-zinc-400 font-mono bg-black/60 px-2 py-0.5 border border-white/10">
+                      3D WebGL · Signature
+                    </span>
+                  </div>
                 </div>
 
                 {/* Clean metadata card below each watch */}
-                <div className="w-full mt-4 bg-black/80 border border-white/10 p-4 text-center space-y-1">
+                <div className="w-full mt-4 bg-black/90 border border-white/10 p-4 text-center space-y-1">
                   <span className="text-[9px] font-mono uppercase tracking-[0.25em] text-zinc-400 block">
                     SLOT 2 · SIGNATURE
                   </span>
@@ -471,18 +488,30 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
                 className={`relative group cursor-pointer transition-all duration-500 flex flex-col items-center ${
                   activeSlot === 2
                     ? "scale-105 z-20 opacity-100"
-                    : "scale-95 opacity-35 hover:opacity-75 blur-[0.4px]"
+                    : "scale-95 opacity-50 hover:opacity-85"
                 }`}
               >
-                <div className="w-full aspect-[3/4] relative flex items-center justify-center">
-                  <canvas ref={canvasRef2} className="w-full h-full object-contain" />
+                <div className="w-full aspect-[3/4] relative flex items-center justify-center bg-gradient-to-b from-[#18110a] via-[#100b06] to-[#0a0704] rounded-sm overflow-hidden border border-white/10 shadow-xl">
+                  <Watch3DInteractive
+                    dialType="slate"
+                    strapType="cognac"
+                    viewMode={activeSlot === 2 ? rollViewMode : "wrist"}
+                    autoRotate={activeSlot === 2}
+                    showControls={false}
+                    className="w-full h-full"
+                  />
                   {activeSlot === 2 && (
-                    <div className="absolute inset-0 ring-1 ring-white/30 pointer-events-none" />
+                    <div className="absolute inset-0 ring-1 ring-white/40 pointer-events-none" />
                   )}
+                  <div className="absolute bottom-2 left-2 pointer-events-none">
+                    <span className="text-[8px] uppercase tracking-[0.2em] text-zinc-400 font-mono bg-black/60 px-2 py-0.5 border border-white/10">
+                      3D WebGL
+                    </span>
+                  </div>
                 </div>
 
                 {/* Clean metadata card below each watch */}
-                <div className="w-full mt-4 bg-black/80 border border-white/10 p-4 text-center space-y-1">
+                <div className="w-full mt-4 bg-black/90 border border-white/10 p-4 text-center space-y-1">
                   <span className="text-[9px] font-mono uppercase tracking-[0.25em] text-zinc-400 block">
                     SLOT 3
                   </span>
@@ -528,21 +557,59 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
             </p>
           </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <button
-              onClick={() => setInspectingDial(selectedDial)}
-              className="w-full sm:w-auto px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] font-medium text-zinc-300 border border-white/20 hover:border-white hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer bg-white/[0.03]"
-            >
-              <Box size={12} className="text-amber-400" />
-              Inspect 3D Watch
-            </button>
-            <button
-              onClick={() => onSelectDialForBooking(selectedDial.name)}
-              className="w-full sm:w-auto px-5 py-2.5 text-[10px] uppercase tracking-[0.2em] font-medium bg-white text-black hover:bg-zinc-200 transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2"
-            >
-              <Check size={12} />
-              Select Dial
-            </button>
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+            {/* Live 3D Angle Selector */}
+            <div className="flex items-center space-x-1 p-1 bg-white/[0.04] border border-white/10 rounded-full">
+              <button
+                onClick={() => { setRollViewMode("wrist"); soundManager.playSoftClick(); }}
+                className={`px-3 py-1 text-[9px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
+                  rollViewMode === "wrist" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                Wrist
+              </button>
+              <button
+                onClick={() => { setRollViewMode("macro"); soundManager.playSoftClick(); }}
+                className={`px-3 py-1 text-[9px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
+                  rollViewMode === "macro" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                Macro
+              </button>
+              <button
+                onClick={() => { setRollViewMode("profile"); soundManager.playSoftClick(); }}
+                className={`px-3 py-1 text-[9px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
+                  rollViewMode === "profile" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                9.8mm
+              </button>
+              <button
+                onClick={() => { setRollViewMode("caseback"); soundManager.playSoftClick(); }}
+                className={`px-3 py-1 text-[9px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
+                  rollViewMode === "caseback" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                Calibre
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <button
+                onClick={() => setInspectingDial(selectedDial)}
+                className="w-full sm:w-auto px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] font-medium text-zinc-300 border border-white/20 hover:border-white hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer bg-white/[0.03]"
+              >
+                <Box size={12} className="text-amber-400" />
+                Inspect 3D
+              </button>
+              <button
+                onClick={() => onSelectDialForBooking(selectedDial.name)}
+                className="w-full sm:w-auto px-5 py-2.5 text-[10px] uppercase tracking-[0.2em] font-medium bg-white text-black hover:bg-zinc-200 transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2"
+              >
+                <Check size={12} />
+                Select Dial
+              </button>
+            </div>
           </div>
         </div>
 

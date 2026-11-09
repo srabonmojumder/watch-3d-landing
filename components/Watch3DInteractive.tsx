@@ -8,10 +8,11 @@ import { RotateCcw, Sparkles } from "lucide-react";
 interface Watch3DInteractiveProps {
   dialType?: DialType;
   strapType?: StrapType;
-  viewMode?: "wrist" | "macro" | "caseback";
+  viewMode?: "wrist" | "macro" | "caseback" | "profile";
   scrollProgress?: number;
   autoRotate?: boolean;
   showControls?: boolean;
+  isWinding?: boolean;
   className?: string;
 }
 
@@ -22,6 +23,7 @@ export function Watch3DInteractive({
   scrollProgress,
   autoRotate = true,
   showControls = true,
+  isWinding = false,
   className = "",
 }: Watch3DInteractiveProps) {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -38,12 +40,23 @@ export function Watch3DInteractive({
   const targetZoomRef = useRef(initialZoom);
   const currentZoomRef = useRef(initialZoom);
   const [isHovered, setIsHovered] = useState(false);
+  const isWindingRef = useRef(isWinding);
+
+  useEffect(() => {
+    isWindingRef.current = isWinding;
+  }, [isWinding]);
 
   // Update target rotation when viewMode or scrollProgress changes
   useEffect(() => {
     if (viewMode === "caseback") {
       targetRotRef.current = { x: 0.0, y: Math.PI };
       targetZoomRef.current = 8.5;
+      return;
+    }
+
+    if (viewMode === "profile") {
+      targetRotRef.current = { x: 0.04, y: Math.PI * 0.48 }; // 9.8mm slim profile angle
+      targetZoomRef.current = 8.2;
       return;
     }
 
@@ -226,8 +239,8 @@ export function Watch3DInteractive({
       currentZoomRef.current += (targetZoomRef.current - currentZoomRef.current) * 0.08;
       camera.position.z = currentZoomRef.current;
 
-      // Mechanical tick
-      watch.tick(elapsedTime);
+      // Mechanical tick & kinetic winding
+      watch.tick(elapsedTime, isWindingRef.current);
 
       renderer.render(scene, camera);
     };

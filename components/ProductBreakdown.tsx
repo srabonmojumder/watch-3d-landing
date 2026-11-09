@@ -12,7 +12,7 @@ interface ProductBreakdownProps {
 
 export function ProductBreakdown({ onOpenBooking }: ProductBreakdownProps) {
   const [strap, setStrap] = useState<"cognac" | "blue" | "steel">("cognac");
-  const [viewMode, setViewMode] = useState<"wrist" | "macro" | "caseback">("wrist");
+  const [viewMode, setViewMode] = useState<"wrist" | "macro" | "caseback" | "profile">("wrist");
   const [renderMode, setRenderMode] = useState<"3d" | "editorial">("3d");
 
   const handleStrapChange = (newStrap: "cognac" | "blue" | "steel") => {
@@ -20,7 +20,7 @@ export function ProductBreakdown({ onOpenBooking }: ProductBreakdownProps) {
     setStrap(newStrap);
   };
 
-  const handleViewModeChange = (newMode: "wrist" | "macro" | "caseback") => {
+  const handleViewModeChange = (newMode: "wrist" | "macro" | "caseback" | "profile") => {
     soundManager.playSoftClick();
     setViewMode(newMode);
   };
@@ -139,6 +139,16 @@ export function ProductBreakdown({ onOpenBooking }: ProductBreakdownProps) {
                 >
                   Caseback
                 </button>
+                <button
+                  onClick={() => handleViewModeChange("profile")}
+                  className={`px-3 py-1.5 text-[9.5px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
+                    viewMode === "profile"
+                      ? "bg-white text-black font-semibold shadow-sm"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  9.8mm Profile
+                </button>
               </div>
 
               {/* 3D vs 2D mode toggle */}
@@ -178,7 +188,7 @@ export function ProductBreakdown({ onOpenBooking }: ProductBreakdownProps) {
                   className="w-full h-full"
                 />
               ) : (
-                <TerraceWristView strapType={strap} viewMode={viewMode} />
+                <TerraceWristView strapType={strap} viewMode={viewMode === "profile" ? "wrist" : viewMode} />
               )}
             </div>
 

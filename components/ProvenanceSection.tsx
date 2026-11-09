@@ -1,9 +1,18 @@
 "use client";
 
-import React from "react";
-import { Compass, CheckCircle2 } from "lucide-react";
+import React, { useState } from "react";
+import { Compass, CheckCircle2, Sparkles, Box } from "lucide-react";
+import { Watch3DInteractive } from "./Watch3DInteractive";
+import { soundManager } from "@/lib/audio";
 
 export function ProvenanceSection() {
+  const [atelierAngle, setAtelierAngle] = useState<"wrist" | "macro" | "profile" | "caseback">("wrist");
+
+  const handleAngleChange = (angle: "wrist" | "macro" | "profile" | "caseback") => {
+    soundManager.playSoftClick();
+    setAtelierAngle(angle);
+  };
+
   return (
     <section className="relative w-full py-28 md:py-36 bg-black border-t border-white/10 px-6 md:px-14 overflow-hidden">
       <div className="max-w-7xl mx-auto">
@@ -11,37 +20,89 @@ export function ProvenanceSection() {
         {/* Story Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
-          {/* Left Column: Visual Atelier Plaque */}
+          {/* Left Column: 3D Atelier Exhibition Pedestal */}
           <div className="lg:col-span-5 relative">
-            <div className="relative aspect-[4/5] w-full max-w-[440px] mx-auto bg-[#0a0a0a] border border-white/15 p-8 flex flex-col justify-between shadow-2xl">
+            <div className="relative w-full max-w-[460px] mx-auto bg-[#0a0a0a] border border-white/15 p-6 flex flex-col justify-between shadow-2xl">
               
-              <div className="space-y-2">
-                <span className="text-[9px] font-mono uppercase tracking-[0.35em] text-zinc-400">
-                  Maison VÉRAN · Fondée à Paris
-                </span>
-                <h3 className="font-sans text-2xl text-white font-normal uppercase tracking-wider">
-                  12, Place Vendôme
-                </h3>
-                <p className="text-xs text-zinc-400 font-light">
-                  75001 Paris, France
-                </p>
-              </div>
-
-              {/* Hand engraving illustration badge */}
-              <div className="py-8 my-auto flex flex-col items-center text-center border-y border-white/10">
-                <div className="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center mb-4 bg-black">
-                  <Compass size={28} className="text-white stroke-[1.2]" />
+              {/* Header */}
+              <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+                <div>
+                  <span className="text-[9px] font-mono uppercase tracking-[0.35em] text-zinc-400 block mb-1">
+                    Maison VÉRAN · Fondée à Paris
+                  </span>
+                  <h3 className="font-sans text-xl text-white font-normal uppercase tracking-wider">
+                    12, Place Vendôme
+                  </h3>
                 </div>
-                <span className="font-sans text-base text-white tracking-widest uppercase mb-1 font-medium">
-                  HORLOGERIE D’EXCEPTION
-                </span>
-                <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-zinc-400">
-                  Design Parisien · Mécanique Glashütte
-                </p>
+                <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[8.5px] font-mono text-zinc-300">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>3D Atelier Stage</span>
+                </div>
               </div>
 
-              <div className="flex items-center justify-between text-[9px] font-mono uppercase tracking-widest text-zinc-400">
-                <span>Certificat Numéroté</span>
+              {/* 3D WebGL Timepiece Atelier Stage */}
+              <div className="relative w-full aspect-[4/4] bg-gradient-to-b from-[#12141a] via-[#090b0e] to-[#040507] border border-white/10 rounded-sm overflow-hidden mb-4 shadow-inner">
+                <Watch3DInteractive
+                  dialType="blue"
+                  strapType="cognac"
+                  viewMode={atelierAngle}
+                  autoRotate={true}
+                  showControls={false}
+                  className="w-full h-full"
+                />
+
+                <div className="absolute top-2.5 left-2.5 pointer-events-none">
+                  <span className="text-[8px] uppercase tracking-[0.2em] text-zinc-400 font-mono bg-black/60 px-2 py-0.5 border border-white/10">
+                    Piece No. 042 / 150
+                  </span>
+                </div>
+
+                <div className="absolute bottom-2.5 right-2.5 pointer-events-none">
+                  <span className="text-[8px] uppercase tracking-[0.2em] text-zinc-400 font-mono bg-black/60 px-2 py-0.5 border border-white/10">
+                    Drag 360°
+                  </span>
+                </div>
+              </div>
+
+              {/* 3D Atelier Perspective Selector */}
+              <div className="grid grid-cols-4 gap-1.5 mb-5 p-1 bg-white/[0.03] border border-white/10 rounded-full">
+                <button
+                  onClick={() => handleAngleChange("wrist")}
+                  className={`py-1 text-[8.5px] uppercase tracking-[0.16em] transition-all cursor-pointer rounded-full text-center ${
+                    atelierAngle === "wrist" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  Gallery
+                </button>
+                <button
+                  onClick={() => handleAngleChange("macro")}
+                  className={`py-1 text-[8.5px] uppercase tracking-[0.16em] transition-all cursor-pointer rounded-full text-center ${
+                    atelierAngle === "macro" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  Dial
+                </button>
+                <button
+                  onClick={() => handleAngleChange("profile")}
+                  className={`py-1 text-[8.5px] uppercase tracking-[0.16em] transition-all cursor-pointer rounded-full text-center ${
+                    atelierAngle === "profile" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  316L Flank
+                </button>
+                <button
+                  onClick={() => handleAngleChange("caseback")}
+                  className={`py-1 text-[8.5px] uppercase tracking-[0.16em] transition-all cursor-pointer rounded-full text-center ${
+                    atelierAngle === "caseback" ? "bg-white text-black font-semibold shadow-sm" : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  Glashütte
+                </button>
+              </div>
+
+              {/* Plaque Footer */}
+              <div className="flex items-center justify-between text-[9px] font-mono uppercase tracking-widest text-zinc-400 pt-3 border-t border-white/10">
+                <span>Certificat d’Authenticité</span>
                 <span className="text-white">Édition Limitée</span>
               </div>
             </div>

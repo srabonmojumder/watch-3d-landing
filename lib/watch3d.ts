@@ -17,7 +17,7 @@ export interface Watch3DComponents {
   crownMesh: THREE.Mesh;
   updateDial: (dial: DialType) => void;
   updateStrap: (strap: StrapType) => void;
-  tick: (time: number) => void;
+  tick: (time: number, isWinding?: boolean) => void;
 }
 
 // Generate procedural high-resolution textures for dials (1024x1024)
@@ -602,18 +602,24 @@ export function build3DWatch(): Watch3DComponents {
     buildStrapMeshes(strap);
   };
 
-  // Real-time mechanical tick & animation
-  const tick = (time: number) => {
-    // 28,800 vph (4 Hz) balance wheel harmonic oscillation
-    const balanceOsc = Math.sin(time * 25) * 1.2;
+  // Real-time mechanical tick & kinetic winding animation
+  const tick = (time: number, isWinding: boolean = false) => {
+    // 28,800 vph (4 Hz) balance wheel harmonic oscillation (spins with extra surge when winding)
+    const speed = isWinding ? 45 : 25;
+    const balanceOsc = Math.sin(time * speed) * (isWinding ? 1.6 : 1.2);
     balanceWheel.rotation.z = balanceOsc;
 
     // Smooth second hand progression
-    secondHand.rotation.z = -time * 1.2;
+    secondHand.rotation.z = -time * (isWinding ? 2.5 : 1.2);
 
     // Minute and Hour hand progression
     minuteHand.rotation.z = -time * 0.1;
     hourHand.rotation.z = -time * 0.008 - Math.PI * 0.35;
+
+    // Crown spin when actively winding
+    if (isWinding) {
+      crownMesh.rotation.x += 0.25;
+    }
   };
 
   return {
