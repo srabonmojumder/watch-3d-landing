@@ -2,8 +2,9 @@
 
 import React, { useState } from "react";
 import { TerraceWristView } from "./TerraceWristView";
+import { Watch3DInteractive } from "./Watch3DInteractive";
 import { soundManager } from "@/lib/audio";
-import { RefreshCw, Shield, Check } from "lucide-react";
+import { RefreshCw, Shield, Check, Box, Image as ImageIcon } from "lucide-react";
 
 interface ProductBreakdownProps {
   onOpenBooking: () => void;
@@ -12,6 +13,7 @@ interface ProductBreakdownProps {
 export function ProductBreakdown({ onOpenBooking }: ProductBreakdownProps) {
   const [strap, setStrap] = useState<"cognac" | "blue" | "steel">("cognac");
   const [viewMode, setViewMode] = useState<"wrist" | "macro" | "caseback">("wrist");
+  const [renderMode, setRenderMode] = useState<"3d" | "editorial">("3d");
 
   const handleStrapChange = (newStrap: "cognac" | "blue" | "steel") => {
     soundManager.playSoftClick();
@@ -21,6 +23,11 @@ export function ProductBreakdown({ onOpenBooking }: ProductBreakdownProps) {
   const handleViewModeChange = (newMode: "wrist" | "macro" | "caseback") => {
     soundManager.playSoftClick();
     setViewMode(newMode);
+  };
+
+  const toggleRenderMode = (mode: "3d" | "editorial") => {
+    soundManager.playSoftClick();
+    setRenderMode(mode);
   };
 
   return (
@@ -95,45 +102,85 @@ export function ProductBreakdown({ onOpenBooking }: ProductBreakdownProps) {
           </div>
 
           {/* ----------------------------------------------------------- */}
-          {/* CENTER COLUMN: Editorial Portrait Photo of Watch on Wrist  */}
+          {/* CENTER COLUMN: 3D WebGL Interactive Timepiece               */}
           {/* ----------------------------------------------------------- */}
           <div className="lg:col-span-4 flex flex-col items-center">
-            {/* View switcher pills */}
-            <div className="flex items-center space-x-1 p-1 bg-white/[0.04] border border-white/10 rounded-full mb-6">
-              <button
-                onClick={() => handleViewModeChange("wrist")}
-                className={`px-3 py-1.5 text-[9.5px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
-                  viewMode === "wrist"
-                    ? "bg-white text-black font-semibold shadow-sm"
-                    : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                Terrace Wrist
-              </button>
-              <button
-                onClick={() => handleViewModeChange("macro")}
-                className={`px-3 py-1.5 text-[9.5px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
-                  viewMode === "macro"
-                    ? "bg-white text-black font-semibold shadow-sm"
-                    : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                Macro Dial
-              </button>
-              <button
-                onClick={() => handleViewModeChange("caseback")}
-                className={`px-3 py-1.5 text-[9.5px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
-                  viewMode === "caseback"
-                    ? "bg-white text-black font-semibold shadow-sm"
-                    : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                Calibre V-101
-              </button>
+            {/* View switcher and Render engine toggles */}
+            <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
+              {/* 3D Angle Presets */}
+              <div className="flex items-center space-x-1 p-1 bg-white/[0.04] border border-white/10 rounded-full">
+                <button
+                  onClick={() => handleViewModeChange("wrist")}
+                  className={`px-3 py-1.5 text-[9.5px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
+                    viewMode === "wrist"
+                      ? "bg-white text-black font-semibold shadow-sm"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  Wrist
+                </button>
+                <button
+                  onClick={() => handleViewModeChange("macro")}
+                  className={`px-3 py-1.5 text-[9.5px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
+                    viewMode === "macro"
+                      ? "bg-white text-black font-semibold shadow-sm"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  Macro
+                </button>
+                <button
+                  onClick={() => handleViewModeChange("caseback")}
+                  className={`px-3 py-1.5 text-[9.5px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
+                    viewMode === "caseback"
+                      ? "bg-white text-black font-semibold shadow-sm"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  Caseback
+                </button>
+              </div>
+
+              {/* 3D vs 2D mode toggle */}
+              <div className="flex items-center space-x-1 p-1 bg-white/[0.04] border border-white/10 rounded-full">
+                <button
+                  onClick={() => toggleRenderMode("3d")}
+                  className={`flex items-center space-x-1.5 px-3 py-1.5 text-[9.5px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
+                    renderMode === "3d"
+                      ? "bg-white text-black font-semibold shadow-sm"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  <Box size={11} />
+                  <span>3D WebGL</span>
+                </button>
+                <button
+                  onClick={() => toggleRenderMode("editorial")}
+                  className={`flex items-center space-x-1.5 px-3 py-1.5 text-[9.5px] uppercase tracking-[0.18em] transition-all cursor-pointer rounded-full ${
+                    renderMode === "editorial"
+                      ? "bg-white text-black font-semibold shadow-sm"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  <ImageIcon size={11} />
+                  <span>Terrace</span>
+                </button>
+              </div>
             </div>
 
-            {/* High-Resolution Portrait Canvas */}
-            <TerraceWristView strapType={strap} viewMode={viewMode} />
+            {/* High-Resolution 3D WebGL Timepiece Canvas */}
+            <div className="relative w-full max-w-[540px] aspect-[4/5] bg-gradient-to-b from-[#111317] via-[#090b0e] to-[#040507] border border-white/10 rounded-sm overflow-hidden shadow-2xl">
+              {renderMode === "3d" ? (
+                <Watch3DInteractive
+                  dialType="blue"
+                  strapType={strap}
+                  viewMode={viewMode}
+                  className="w-full h-full"
+                />
+              ) : (
+                <TerraceWristView strapType={strap} viewMode={viewMode} />
+              )}
+            </div>
 
             {/* Tool-Free Strap Selector */}
             <div className="w-full max-w-[540px] mt-6 bg-[#0a0a0a] border border-white/10 p-4">
@@ -183,7 +230,7 @@ export function ProductBreakdown({ onOpenBooking }: ProductBreakdownProps) {
                   }`}
                 >
                   <div className="w-full h-2.5 bg-gradient-to-r from-zinc-400 via-zinc-200 to-zinc-400 mb-1.5" />
-                  <span className="block text-[10px] font-medium text-white truncate">Beads of Rice</span>
+                  <span className="block text-[10px] font-medium text-white truncate">Milanese Mesh</span>
                   <span className="block text-[9px] text-zinc-400">316L Steel</span>
                 </button>
               </div>

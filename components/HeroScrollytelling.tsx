@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { soundManager } from "@/lib/audio";
+import { Watch3DInteractive } from "./Watch3DInteractive";
 
 // Register ScrollTrigger globally on client
 if (typeof window !== "undefined") {
@@ -937,6 +938,25 @@ export function HeroScrollytelling() {
       {/* Monochromatic editorial vignette */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/50" />
+
+      {/* Real-time 3D WebGL Timepiece Overlay (Emerges dynamically during macro scrub) */}
+      <div
+        className="absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-700 pointer-events-none"
+        style={{
+          opacity: scrubProgress >= 0.60 ? 1 : 0,
+        }}
+      >
+        <div className="w-full h-full max-w-4xl max-h-[80vh] relative pointer-events-auto">
+          <Watch3DInteractive
+            dialType="blue"
+            strapType="cognac"
+            scrollProgress={(scrubProgress - 0.60) / 0.40}
+            autoRotate={true}
+            showControls={false}
+            className="w-full h-full"
+          />
+        </div>
+      </div>
 
       {/* Micro Telemetry Overlay during scrub: Bottom Left */}
       <div suppressHydrationWarning className="absolute bottom-8 left-8 md:bottom-12 md:left-14 z-30 pointer-events-auto flex flex-col space-y-3">

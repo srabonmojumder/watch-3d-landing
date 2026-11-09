@@ -2,7 +2,8 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { soundManager } from "@/lib/audio";
-import { Check, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, Eye, ChevronLeft, ChevronRight, Box } from "lucide-react";
+import { Watch3DInteractive } from "./Watch3DInteractive";
 
 interface WatchRollShowcaseProps {
   onSelectDialForBooking: (dialName: string) => void;
@@ -530,10 +531,10 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <button
               onClick={() => setInspectingDial(selectedDial)}
-              className="w-full sm:w-auto px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] font-medium text-zinc-300 border border-white/20 hover:border-white hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] font-medium text-zinc-300 border border-white/20 hover:border-white hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer bg-white/[0.03]"
             >
-              <Eye size={12} />
-              4× Loupe
+              <Box size={12} className="text-amber-400" />
+              Inspect 3D Watch
             </button>
             <button
               onClick={() => onSelectDialForBooking(selectedDial.name)}
@@ -547,14 +548,14 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
 
       </div>
 
-      {/* Optical Magnification Loupe Modal */}
+      {/* Optical Magnification Loupe & 3D Interactive Stage Modal */}
       {inspectingDial && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-2xl flex items-center justify-center p-6 animate-in fade-in duration-200">
-          <div className="relative max-w-lg w-full bg-[#0a0a0a] border border-white/20 p-8 shadow-2xl">
-            <div className="flex justify-between items-center pb-4 border-b border-white/10 mb-6">
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-2xl flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
+          <div className="relative max-w-xl w-full bg-[#0a0a0a] border border-white/20 p-6 sm:p-8 shadow-2xl flex flex-col">
+            <div className="flex justify-between items-center pb-4 border-b border-white/10 mb-4">
               <div>
                 <span className="text-[9px] uppercase tracking-[0.3em] text-zinc-400 font-mono block mb-1">
-                  4× Optical Magnification Loupe
+                  3D Horology Stage · Real-Time WebGL
                 </span>
                 <h3 className="font-sans text-lg text-white uppercase tracking-wider font-medium">
                   {inspectingDial.name} · {inspectingDial.finish}
@@ -562,52 +563,42 @@ export function WatchRollShowcase({ onSelectDialForBooking }: WatchRollShowcaseP
               </div>
               <button
                 onClick={() => setInspectingDial(null)}
-                className="text-zinc-400 hover:text-white text-xs uppercase tracking-widest px-2 py-1 border border-white/10 cursor-pointer"
+                className="text-zinc-400 hover:text-white text-xs uppercase tracking-widest px-3 py-1.5 border border-white/10 hover:border-white/30 cursor-pointer transition-colors"
               >
                 Close ×
               </button>
             </div>
 
-            <div className="relative w-full aspect-square max-h-[320px] mx-auto rounded-full overflow-hidden border border-white/40 shadow-2xl mb-6 flex items-center justify-center bg-black">
-              <div
-                className="w-full h-full flex flex-col items-center justify-center p-6 text-center"
-                style={{
-                  background:
-                    inspectingDial.id === "silver"
-                      ? "radial-gradient(circle, #f8fafc 0%, #cbd5e1 70%, #94a3b8 100%)"
-                      : inspectingDial.id === "blue"
-                      ? "radial-gradient(circle, #2563eb 0%, #1e3a8a 60%, #0a1122 100%)"
-                      : "radial-gradient(circle, #334155 0%, #1e293b 60%, #0f172a 100%)",
-                }}
-              >
-                <div className="p-5 bg-black/60 backdrop-blur-md border border-white/20 max-w-xs">
-                  <span className="text-[9px] font-mono uppercase tracking-[0.25em] text-white block mb-2">
-                    Micro-Surface Inspection
-                  </span>
-                  <p className="text-[11px] text-zinc-300 leading-relaxed font-light mb-2">
-                    {inspectingDial.id === "slate"
-                      ? "Individual Clous de Paris guilloché pyramids cut at 45-degree opposing angles with a single-point diamond burin."
-                      : inspectingDial.id === "blue"
-                      ? "Microscopic galvanic cobalt deposition over fine brass wire radial brushing."
-                      : "Hand-applied emery horizontal drawing finished with micro-crystalline silver salts."}
-                  </p>
-                  <span className="text-[9px] font-mono text-zinc-400">
-                    Tolerance: ±0.002 mm · Hand Finished in Paris
-                  </span>
-                </div>
-              </div>
+            {/* Real 3D Interactive Watch Viewport */}
+            <div className="relative w-full aspect-[4/3] rounded-sm overflow-hidden border border-white/20 shadow-2xl mb-4 bg-gradient-to-b from-[#14171d] via-[#0b0d10] to-[#040507]">
+              <Watch3DInteractive
+                dialType={inspectingDial.id}
+                strapType={inspectingDial.id === "blue" ? "blue" : "cognac"}
+                viewMode="wrist"
+                autoRotate={true}
+                showControls={true}
+                className="w-full h-full"
+              />
             </div>
+
+            <p className="text-[11px] text-zinc-400 font-light leading-relaxed mb-4">
+              {inspectingDial.id === "slate"
+                ? "Traditional hand-turned Clous de Paris hobnail guilloché engraved on solid slate brass plate, framed by an anthracite brushed chapter ring."
+                : inspectingDial.id === "blue"
+                ? "Exclusive galvanic cobalt blue sunburst dial inspired by twilight along the Seine. Diamond-faceted rhodium hands and crisp silvery accents."
+                : "Hand-brushed silver dial capturing soft Parisian morning daylight. Flame-tempered blued steel leaf hands with minimalist railway track."}
+            </p>
 
             <div className="flex justify-between items-center pt-4 border-t border-white/10">
               <span className="text-[11px] font-mono text-zinc-400">
-                Calibre V-101 Verified
+                Calibre V-101 · 39 mm
               </span>
               <button
                 onClick={() => {
                   setInspectingDial(null);
                   onSelectDialForBooking(inspectingDial.name);
                 }}
-                className="px-5 py-2 text-[10px] uppercase tracking-widest bg-white text-black font-semibold hover:bg-zinc-200 cursor-pointer"
+                className="px-5 py-2.5 text-[10px] uppercase tracking-widest bg-white text-black font-semibold hover:bg-zinc-200 cursor-pointer shadow-md"
               >
                 Select For Fitting
               </button>
