@@ -28,11 +28,11 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${cormorant.variable} ${montserrat.variable} dark h-full antialiased`}
+      className={`${cormorant.variable} ${montserrat.variable} dark antialiased`}
     >
       <body
         suppressHydrationWarning
-        className="min-h-full bg-black text-[#f4f4f5] font-sans selection:bg-white/20 selection:text-white"
+        className="bg-black text-[#f4f4f5] font-sans selection:bg-white/20 selection:text-white"
       >
         {children}
       </body>
