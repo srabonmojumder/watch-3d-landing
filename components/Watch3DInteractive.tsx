@@ -31,20 +31,28 @@ export function Watch3DInteractive({
   // Interaction state
   const isDraggingRef = useRef(false);
   const prevMouseRef = useRef({ x: 0, y: 0 });
-  const rotRef = useRef({ x: 0.18, y: -0.22 });
-  const targetRotRef = useRef({ x: 0.18, y: -0.22 });
-  const targetZoomRef = useRef(7.8);
-  const currentZoomRef = useRef(7.8);
+  const initialRot = scrollProgress !== undefined ? { x: 0.28, y: -0.35 } : { x: 0.18, y: -0.22 };
+  const rotRef = useRef(initialRot);
+  const targetRotRef = useRef(initialRot);
+  const initialZoom = scrollProgress !== undefined ? 13.2 - Math.max(0, Math.min(1, scrollProgress)) * 6.8 : 7.8;
+  const targetZoomRef = useRef(initialZoom);
+  const currentZoomRef = useRef(initialZoom);
   const [isHovered, setIsHovered] = useState(false);
 
   // Update target rotation when viewMode or scrollProgress changes
   useEffect(() => {
+    if (viewMode === "caseback") {
+      targetRotRef.current = { x: 0.0, y: Math.PI };
+      targetZoomRef.current = 8.5;
+      return;
+    }
+
     if (scrollProgress !== undefined) {
       // Dynamic scroll choreography: pans in from angle to straight macro view
       const sp = Math.max(0, Math.min(1, scrollProgress));
-      targetRotRef.current.x = 0.35 - sp * 0.35;
-      targetRotRef.current.y = -0.45 + sp * 0.45;
-      targetZoomRef.current = 9.5 - sp * 4.4; // Smooth zoom into macro dial
+      targetRotRef.current.x = 0.28 - sp * 0.28;
+      targetRotRef.current.y = -0.35 + sp * 0.35;
+      targetZoomRef.current = 13.2 - sp * 6.8; // sp=0: 13.2 (full watch, elegant proportion); sp=1: 6.4 (macro dial)
     } else {
       if (viewMode === "wrist") {
         targetRotRef.current = { x: 0.18, y: -0.22 };
@@ -52,9 +60,6 @@ export function Watch3DInteractive({
       } else if (viewMode === "macro") {
         targetRotRef.current = { x: 0.0, y: 0.0 };
         targetZoomRef.current = 5.2; // Deep macro zoom
-      } else if (viewMode === "caseback") {
-        targetRotRef.current = { x: 0.0, y: Math.PI }; // 180° flip to exhibition movement
-        targetZoomRef.current = 6.8;
       }
     }
   }, [viewMode, scrollProgress]);
@@ -83,7 +88,7 @@ export function Watch3DInteractive({
     const height = container.clientHeight || 750;
 
     const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 100);
-    camera.position.set(0, 0, 8.5);
+    camera.position.set(0, 0, currentZoomRef.current);
 
     // 2. High-Performance WebGL Renderer
     const renderer = new THREE.WebGLRenderer({
@@ -207,9 +212,11 @@ export function Watch3DInteractive({
       rotRef.current.y += (targetRotRef.current.y - rotRef.current.y) * 0.12;
 
       // Auto gentle hover rotation when idle
-      if (!isDraggingRef.current && autoRotate && scrollProgress === undefined) {
-        watch.root.rotation.x = rotRef.current.x + Math.sin(elapsedTime * 0.8) * 0.04;
-        watch.root.rotation.y = rotRef.current.y + Math.cos(elapsedTime * 0.6) * 0.05;
+      if (!isDraggingRef.current && autoRotate) {
+        const floatX = Math.sin(elapsedTime * 0.7) * 0.022;
+        const floatY = Math.cos(elapsedTime * 0.5) * 0.032;
+        watch.root.rotation.x = rotRef.current.x + floatX;
+        watch.root.rotation.y = rotRef.current.y + floatY;
       } else {
         watch.root.rotation.x = rotRef.current.x;
         watch.root.rotation.y = rotRef.current.y;

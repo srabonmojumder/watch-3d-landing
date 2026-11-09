@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { soundManager } from "@/lib/audio";
 import { Watch3DInteractive } from "./Watch3DInteractive";
+import { DialType } from "@/lib/watch3d";
 
 // Register ScrollTrigger globally on client
 if (typeof window !== "undefined") {
@@ -15,7 +16,10 @@ export function HeroScrollytelling() {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
-  const subtextRef = useRef<HTMLDivElement>(null);
+
+  // 3D watch states in Hero
+  const [activeDial, setActiveDial] = useState<DialType>("blue");
+  const [activeViewMode, setActiveViewMode] = useState<"wrist" | "macro" | "caseback">("wrist");
 
   // Micro Telemetry states
   const [telemetryTime, setTelemetryTime] = useState("00:01");
@@ -843,11 +847,12 @@ export function HeroScrollytelling() {
     // GSAP context scoping for clean teardown and zero memory leaks
     const gsapCtx = gsap.context(() => {
       ScrollTrigger.create({
+        id: "hero-trigger",
         trigger: containerRef.current,
         start: "top top",
-        end: "+=400%",
+        end: "+=120%", // Fast, responsive 1.2-viewport scroll sequence (no endless scrolling!)
         pin: true,
-        scrub: 0.3,
+        scrub: 0.35,
         onUpdate: (self) => {
           const progress = self.progress;
           progressRef.current = progress;
@@ -872,12 +877,12 @@ export function HeroScrollytelling() {
           }
 
           // Service bell chime trigger at concierge desk
-          if (progress >= 0.45 && progress <= 0.55) {
+          if (progress >= 0.40 && progress <= 0.60) {
             if (!bellRungRef.current) {
               bellRungRef.current = true;
               soundManager.playConciergeBell();
             }
-          } else if (progress < 0.38 || progress > 0.65) {
+          } else if (progress < 0.30 || progress > 0.70) {
             bellRungRef.current = false;
           }
 
@@ -888,21 +893,6 @@ export function HeroScrollytelling() {
           rafIdRef.current = requestAnimationFrame(() => {
             drawScene(ctx, progress, canvas.width, canvas.height);
           });
-
-          // Hero Typography Reveal: "LE VOYAGEUR"
-          if (textRef.current && subtextRef.current) {
-            if (progress > 0.70) {
-              const textAlpha = Math.min(1, (progress - 0.70) / 0.18);
-              const textY = (1 - textAlpha) * 35;
-              textRef.current.style.opacity = `${textAlpha}`;
-              textRef.current.style.transform = `translateY(${textY}px)`;
-              subtextRef.current.style.opacity = `${textAlpha}`;
-              subtextRef.current.style.transform = `translateY(${textY * 0.6}px)`;
-            } else {
-              textRef.current.style.opacity = "0";
-              subtextRef.current.style.opacity = "0";
-            }
-          }
         },
       });
     }, containerRef);
@@ -923,12 +913,23 @@ export function HeroScrollytelling() {
     }
   };
 
+  const handleScrubBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+    const trigger = ScrollTrigger.getById("hero-trigger");
+    if (trigger) {
+      const targetScroll = trigger.start + ratio * (trigger.end - trigger.start);
+      window.scrollTo({ top: targetScroll, behavior: "smooth" });
+    }
+  };
+
   return (
     <section
       ref={containerRef}
       className="relative w-full h-screen bg-black overflow-hidden select-none"
     >
-      {/* HTML5 Zero-Stutter Direct Canvas */}
+      {/* HTML5 Zero-Stutter Direct Atmospheric Canvas */}
       <canvas
         ref={canvasRef}
         className="w-full h-full object-cover block"
@@ -936,25 +937,99 @@ export function HeroScrollytelling() {
       />
 
       {/* Monochromatic editorial vignette */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/50" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/70" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-black/60" />
 
-      {/* Real-time 3D WebGL Timepiece Overlay (Emerges dynamically during macro scrub) */}
-      <div
-        className="absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-700 pointer-events-none"
-        style={{
-          opacity: scrubProgress >= 0.60 ? 1 : 0,
-        }}
-      >
-        <div className="w-full h-full max-w-4xl max-h-[80vh] relative pointer-events-auto">
+      {/* Hero Typography: Editorial "LE VOYAGEUR" positioned in z-10 directly behind 3D Watch */}
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none px-6 text-center">
+        <div
+          ref={textRef}
+          className="transition-transform duration-200 ease-out flex flex-col items-center select-none"
+          style={{
+            transform: `translateY(-70px) scale(${1 + scrubProgress * 0.04})`,
+          }}
+        >
+          <span className="text-[10px] md:text-xs uppercase tracking-[0.45em] text-zinc-400 font-medium block mb-3">
+            VÉRAN ATELIER · PARIS
+          </span>
+          <h1 className="font-sans text-5xl sm:text-7xl md:text-8xl lg:text-9xl tracking-[0.14em] uppercase font-bold text-white/90 drop-shadow-[0_20px_50px_rgba(0,0,0,0.95)]">
+            LE VOYAGEUR
+          </h1>
+          <p className="mt-4 text-xs md:text-sm tracking-[0.3em] uppercase text-zinc-400 max-w-xl font-light">
+            Steel 39 mm · Hand-Wound Manufacture Calibre · €9,800
+          </p>
+        </div>
+      </div>
+
+      {/* Real-time 3D WebGL Timepiece Overlay: Instantly visible from frame 0 with dynamic zoom */}
+      <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+        <div className="w-full h-full max-w-5xl max-h-[82vh] relative pointer-events-auto flex items-center justify-center">
           <Watch3DInteractive
-            dialType="blue"
+            dialType={activeDial}
             strapType="cognac"
-            scrollProgress={(scrubProgress - 0.60) / 0.40}
+            viewMode={activeViewMode}
+            scrollProgress={activeViewMode === "caseback" ? undefined : scrubProgress}
             autoRotate={true}
             showControls={false}
             className="w-full h-full"
           />
+        </div>
+      </div>
+
+      {/* Top Center: Real-time 3D WebGL & Drag Orbit Badge */}
+      <div className="absolute top-18 md:top-20 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex items-center">
+        <span className="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-[9px] md:text-[10px] uppercase tracking-[0.25em] text-zinc-300 font-mono shadow-2xl">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span>Real-time 3D WebGL · Drag to Rotate 360°</span>
+        </span>
+      </div>
+
+      {/* Top Right: Quick Dial Selector & 180° Flip Calibre Switcher */}
+      <div className="absolute top-18 md:top-20 right-6 md:right-12 z-30 pointer-events-auto flex flex-col items-end space-y-2">
+        <div className="flex items-center space-x-1 p-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[9px] uppercase tracking-[0.2em] font-mono">
+          <button
+            onClick={() => { setActiveDial("blue"); soundManager.playSoftClick(); }}
+            className={`px-2.5 py-1 rounded-full transition-colors cursor-pointer ${
+              activeDial === "blue" ? "bg-white text-black font-semibold" : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            Bleu
+          </button>
+          <button
+            onClick={() => { setActiveDial("silver"); soundManager.playSoftClick(); }}
+            className={`px-2.5 py-1 rounded-full transition-colors cursor-pointer ${
+              activeDial === "silver" ? "bg-white text-black font-semibold" : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            Silver
+          </button>
+          <button
+            onClick={() => { setActiveDial("slate"); soundManager.playSoftClick(); }}
+            className={`px-2.5 py-1 rounded-full transition-colors cursor-pointer ${
+              activeDial === "slate" ? "bg-white text-black font-semibold" : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            Slate
+          </button>
+        </div>
+
+        <div className="flex items-center space-x-1 p-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[9px] uppercase tracking-[0.2em] font-mono">
+          <button
+            onClick={() => { setActiveViewMode("wrist"); soundManager.playSoftClick(); }}
+            className={`px-2.5 py-1 rounded-full transition-colors cursor-pointer ${
+              activeViewMode === "wrist" ? "bg-white/25 text-white font-medium" : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            Dial 3D
+          </button>
+          <button
+            onClick={() => { setActiveViewMode("caseback"); soundManager.playSoftClick(); }}
+            className={`px-2.5 py-1 rounded-full transition-colors cursor-pointer ${
+              activeViewMode === "caseback" ? "bg-white/25 text-white font-medium" : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            180° Calibre
+          </button>
         </div>
       </div>
 
@@ -967,13 +1042,19 @@ export function HeroScrollytelling() {
           <span className="text-zinc-300 tracking-[0.25em]">{telemetryLabel}</span>
         </div>
 
-        {/* Slider scrub bar indicator */}
+        {/* Clickable slider scrub bar indicator */}
         <div suppressHydrationWarning className="flex items-center space-x-3">
-          <div className="w-44 sm:w-56 h-[2px] bg-white/15 relative overflow-hidden">
-            <div
-              className="h-full bg-white transition-all duration-75"
-              style={{ width: `${scrubProgress * 100}%` }}
-            />
+          <div
+            onClick={handleScrubBarClick}
+            title="Click anywhere to scrub timeline"
+            className="w-44 sm:w-64 h-3 flex items-center cursor-pointer group"
+          >
+            <div className="w-full h-[3px] bg-white/20 relative overflow-hidden group-hover:h-[4px] transition-all">
+              <div
+                className="h-full bg-white transition-all duration-75"
+                style={{ width: `${scrubProgress * 100}%` }}
+              />
+            </div>
           </div>
           <span className="text-[9px] font-mono text-zinc-400">
             {Math.round(scrubProgress * 100)}%
@@ -981,43 +1062,20 @@ export function HeroScrollytelling() {
         </div>
       </div>
 
-      {/* Hero Typography Reveal: Massive Bold "LE VOYAGEUR" */}
-      <div className="absolute inset-0 z-30 flex flex-col items-center justify-center pointer-events-none px-6 text-center">
-        <div
-          ref={textRef}
-          style={{ opacity: 0, transform: "translateY(35px)" }}
-          className="transition-all duration-300 ease-out flex flex-col items-center"
+      {/* Bottom Right CTA & Scroll Prompt */}
+      <div className="absolute bottom-8 right-8 md:bottom-12 md:right-14 z-30 flex items-center space-x-4">
+        <button
+          onClick={handleSkipToSpecs}
+          className="px-5 py-2.5 text-[10px] uppercase tracking-[0.25em] bg-white text-black font-semibold hover:bg-zinc-200 transition-colors cursor-pointer shadow-xl flex items-center space-x-2"
         >
-          <span className="text-[10px] md:text-xs uppercase tracking-[0.45em] text-zinc-400 font-medium block mb-4">
-            VÉRAN ATELIER · PARIS
-          </span>
-          <h1 className="font-sans text-5xl sm:text-7xl md:text-8xl lg:text-9xl tracking-[0.14em] uppercase font-bold text-white drop-shadow-[0_20px_50px_rgba(0,0,0,1)]">
-            LE VOYAGEUR
-          </h1>
-        </div>
-
-        <div
-          ref={subtextRef}
-          style={{ opacity: 0, transform: "translateY(25px)" }}
-          className="mt-6 flex flex-col items-center space-y-4 transition-all duration-300 ease-out pointer-events-auto"
-        >
-          <p className="text-xs md:text-sm tracking-[0.3em] uppercase text-zinc-300 max-w-xl font-light">
-            Steel 39 mm · Hand-Wound Manufacture Calibre · €9,800
-          </p>
-          <button
-            onClick={handleSkipToSpecs}
-            className="px-6 py-2.5 text-[10px] uppercase tracking-[0.25em] bg-white text-black font-semibold hover:bg-zinc-200 transition-colors cursor-pointer shadow-lg"
-          >
-            Explore Specifications
-          </button>
-        </div>
-      </div>
-
-      {/* Bottom Right Scroll Prompt */}
-      <div className="absolute bottom-8 right-8 md:bottom-12 md:right-14 z-30 hidden sm:flex items-center space-x-3 text-[10px] uppercase tracking-[0.25em] text-zinc-400">
-        <span>Scroll to scrub</span>
-        <div className="w-4 h-6 border border-white/20 rounded-full flex items-start justify-center p-1">
-          <div className="w-1 h-1.5 bg-white rounded-full animate-bounce" />
+          <span>Explore Specs</span>
+          <span>↓</span>
+        </button>
+        <div className="hidden sm:flex items-center space-x-2 text-[10px] uppercase tracking-[0.2em] text-zinc-400">
+          <span>Scroll to scrub</span>
+          <div className="w-3.5 h-5 border border-white/20 rounded-full flex items-start justify-center p-0.5">
+            <div className="w-1 h-1.5 bg-white rounded-full animate-bounce" />
+          </div>
         </div>
       </div>
     </section>
