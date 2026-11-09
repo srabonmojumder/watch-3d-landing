@@ -10,17 +10,22 @@ interface NavbarProps {
 
 export function Navbar({ onOpenBooking }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
 
+    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const isScrolled = mounted && scrolled;
 
   const toggleSound = () => {
     const nextMuted = !isMuted;
@@ -42,8 +47,9 @@ export function Navbar({ onOpenBooking }: NavbarProps) {
   return (
     <>
       <header
+        suppressHydrationWarning
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 border-b ${
-          scrolled
+          isScrolled
             ? "bg-black/75 backdrop-blur-xl border-white/10 py-4 shadow-2xl"
             : "bg-black/40 backdrop-blur-md border-white/10 py-5"
         }`}

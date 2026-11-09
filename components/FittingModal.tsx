@@ -195,6 +195,7 @@ export function FittingModal({
                   </label>
                   <input
                     type="date"
+                    suppressHydrationWarning
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
                     required

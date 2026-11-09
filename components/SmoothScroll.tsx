@@ -46,5 +46,5 @@ export function SmoothScrollProvider({
     };
   }, []);
 
-  return <div className="w-full relative bg-black text-white">{children}</div>;
+  return <div suppressHydrationWarning className="w-full relative bg-black text-white">{children}</div>;
 }

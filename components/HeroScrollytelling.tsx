@@ -755,8 +755,8 @@ export function HeroScrollytelling() {
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/50" />
 
       {/* Micro Telemetry Overlay during scrub: Bottom Left */}
-      <div className="absolute bottom-8 left-8 md:bottom-12 md:left-14 z-30 pointer-events-auto flex flex-col space-y-3">
-        <div className="flex items-center space-x-3 text-[10px] md:text-[11px] font-mono uppercase tracking-[0.22em] text-zinc-400">
+      <div suppressHydrationWarning className="absolute bottom-8 left-8 md:bottom-12 md:left-14 z-30 pointer-events-auto flex flex-col space-y-3">
+        <div suppressHydrationWarning className="flex items-center space-x-3 text-[10px] md:text-[11px] font-mono uppercase tracking-[0.22em] text-zinc-400">
           <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
           <span className="text-white font-medium">{telemetryTime} / 00:07</span>
           <span className="text-zinc-400">·</span>
@@ -764,7 +764,7 @@ export function HeroScrollytelling() {
         </div>
 
         {/* Slider scrub bar indicator */}
-        <div className="flex items-center space-x-3">
+        <div suppressHydrationWarning className="flex items-center space-x-3">
           <div className="w-44 sm:w-56 h-[2px] bg-white/15 relative overflow-hidden">
             <div
               className="h-full bg-white transition-all duration-75"
