@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import * as THREE from "three";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { soundManager } from "@/lib/audio";
@@ -218,18 +219,21 @@ export function WatchRollShowcase({ onSelectDialForBooking }) {
       powerPreference: "high-performance",
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.25;
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     container.appendChild(renderer.domElement);
 
-    // 3. Haute Horlogerie Lighting Studio
+    // Realistic HDR Studio Environment Map
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    pmremGenerator.compileEquirectangularShader();
+    const roomEnv = new RoomEnvironment();
+    scene.environment = pmremGenerator.fromScene(roomEnv).texture;
+
+    // 3. Haute Horlogerie Lighting Studio (Optimized Directional Lights)
     const keyLight = new THREE.DirectionalLight(0xffffff, 2.8);
     keyLight.position.set(5, 8, 7);
-    keyLight.castShadow = true;
     scene.add(keyLight);
 
     const fillLight = new THREE.DirectionalLight(0xdbeafe, 1.4);
@@ -321,6 +325,13 @@ export function WatchRollShowcase({ onSelectDialForBooking }) {
         const offset = i - currentScrubRef.current;
         const absOffset = Math.abs(offset);
 
+        // Frustum cull off-screen watches to boost FPS
+        if (absOffset > 2.0) {
+          watch.root.visible = false;
+          return;
+        }
+        watch.root.visible = true;
+
         const x = offset * spacing;
         const z = -Math.pow(absOffset, 1.25) * 2.4;
 
@@ -334,11 +345,30 @@ export function WatchRollShowcase({ onSelectDialForBooking }) {
         watch.root.rotation.set(rotX, rotY, 0);
         watch.root.scale.setScalar(scale);
 
-        watch.tick(time);
+        if (absOffset < 1.2) {
+          watch.tick(time);
+        }
       });
 
       renderer.render(scene, camera);
     };
+
+    // Pause WebGL rendering when section is offscreen
+    let isVisible = true;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const wasVisible = isVisible;
+        isVisible = entry.isIntersecting;
+        if (isVisible && !wasVisible && !animId) {
+          clock.start();
+          animate();
+        }
+      },
+      { threshold: 0.02 }
+    );
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
 
     animate();
 
@@ -356,7 +386,10 @@ export function WatchRollShowcase({ onSelectDialForBooking }) {
     handleResize();
 
     return () => {
-      cancelAnimationFrame(animId);
+      if (animId) {
+        cancelAnimationFrame(animId);
+      }
+      observer.disconnect();
       window.removeEventListener("resize", handleResize);
       container.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointermove", onPointerMove);
@@ -366,6 +399,7 @@ export function WatchRollShowcase({ onSelectDialForBooking }) {
         renderer.domElement.parentElement.removeChild(renderer.domElement);
       }
       renderer.dispose();
+      pmremGenerator.dispose();
     };
   }, []);
 

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { build3DWatch } from "@/lib/watch3d";
 import { RotateCcw, Sparkles } from "lucide-react";
 
@@ -18,6 +19,8 @@ export function Watch3DInteractive({
   const mountRef = useRef(null);
   const watchRef = useRef(null);
   const rendererRef = useRef(null);
+  const sceneRef = useRef(null);
+  const cameraRef = useRef(null);
 
   // Interaction state
   const isDraggingRef = useRef(false);
@@ -50,7 +53,6 @@ export function Watch3DInteractive({
     }
 
     if (scrollProgress !== undefined) {
-      // Dynamic scroll choreography: pans in from angle to straight macro view
       const sp = Math.max(0, Math.min(1, scrollProgress));
       targetRotRef.current.x = 0.28 - sp * 0.28;
       targetRotRef.current.y = -0.35 + sp * 0.35;
@@ -86,47 +88,55 @@ export function Watch3DInteractive({
 
     // 1. Scene & Camera
     const scene = new THREE.Scene();
+    sceneRef.current = scene;
     const width = container.clientWidth || 600;
     const height = container.clientHeight || 750;
 
     const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 100);
     camera.position.set(0, 0, currentZoomRef.current);
+    cameraRef.current = camera;
 
-    // 2. High-Performance WebGL Renderer
+    // 2. High-Performance WebGL Renderer (capped pixel ratio 1.5 for silky smooth FPS)
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
       powerPreference: "high-performance",
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
+    renderer.toneMappingExposure = 1.35;
     rendererRef.current = renderer;
     container.appendChild(renderer.domElement);
 
-    // 3. Luxury Studio Lighting
+    // 3. Realistic HDR Studio Environment Map
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    pmremGenerator.compileEquirectangularShader();
+    const roomEnv = new RoomEnvironment();
+    scene.environment = pmremGenerator.fromScene(roomEnv).texture;
+
+    // 4. Luxury Studio Directional Lights
     const keyLight = new THREE.DirectionalLight(0xfff7ed, 3.2); // Warm daylight
     keyLight.position.set(5, 8, 6);
     scene.add(keyLight);
 
-    const rimLight = new THREE.DirectionalLight(0x60a5fa, 2.5); // Cool blue sapphire rim
+    const rimLight = new THREE.DirectionalLight(0x60a5fa, 2.2); // Cool blue sapphire rim
     rimLight.position.set(-6, -4, -4);
     scene.add(rimLight);
 
-    const fillLight = new THREE.DirectionalLight(0xf8fafc, 1.8);
+    const fillLight = new THREE.DirectionalLight(0xf8fafc, 1.5);
     fillLight.position.set(0, -6, 5);
     scene.add(fillLight);
 
-    const ambientLight = new THREE.AmbientLight(0x1e293b, 1.2);
+    const ambientLight = new THREE.AmbientLight(0x1e293b, 1.0);
     scene.add(ambientLight);
 
-    // 4. Build 3D Watch Model
+    // 5. Build 3D Watch Model
     const watch = build3DWatch(dialType, strapType);
     watchRef.current = watch;
     scene.add(watch.root);
 
-    // 5. Mouse / Touch Orbit Controls
+    // 6. Mouse / Touch Orbit Controls
     const handleMouseDown = (e) => {
       isDraggingRef.current = true;
       prevMouseRef.current = { x: e.clientX, y: e.clientY };
@@ -145,8 +155,8 @@ export function Watch3DInteractive({
         const rect = container.getBoundingClientRect();
         const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
         const ny = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
-        watch.root.position.x = nx * 0.25;
-        watch.root.position.y = ny * 0.25;
+        watch.root.position.x = nx * 0.18;
+        watch.root.position.y = ny * 0.18;
       }
     };
 
@@ -184,7 +194,7 @@ export function Watch3DInteractive({
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
     window.addEventListener("touchend", handleTouchEnd);
 
-    // 6. Resize Observer
+    // 7. Resize Observer
     const handleResize = () => {
       if (!container || !renderer) return;
       const w = container.clientWidth;
@@ -196,11 +206,16 @@ export function Watch3DInteractive({
 
     window.addEventListener("resize", handleResize);
 
-    // 7. Render Loop with smooth inertia damping
-    let animationFrameId;
+    // 8. Viewport Intersection Observer: Pause WebGL RAF when off-screen
+    let isVisible = true;
+    let animationFrameId = null;
     let clock = new THREE.Clock();
 
     const animate = () => {
+      if (!isVisible) {
+        animationFrameId = null;
+        return;
+      }
       animationFrameId = requestAnimationFrame(animate);
 
       const elapsedTime = clock.getElapsedTime();
@@ -226,10 +241,26 @@ export function Watch3DInteractive({
       renderer.render(scene, camera);
     };
 
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const wasVisible = isVisible;
+        isVisible = entry.isIntersecting;
+        if (isVisible && !wasVisible && !animationFrameId) {
+          clock.start();
+          animate();
+        }
+      },
+      { threshold: 0.02 }
+    );
+    observer.observe(container);
+
     animate();
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      observer.disconnect();
       window.removeEventListener("resize", handleResize);
       container.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mousemove", handleMouseMove);
@@ -242,8 +273,9 @@ export function Watch3DInteractive({
         container.removeChild(renderer.domElement);
       }
       renderer.dispose();
+      pmremGenerator.dispose();
     };
-  }, [autoRotate, dialType, strapType]);
+  }, [autoRotate]);
 
   const handleResetOrientation = () => {
     targetRotRef.current = { x: -0.35, y: 0.25 };
@@ -263,7 +295,7 @@ export function Watch3DInteractive({
           <div className="absolute top-4 left-4 z-20 pointer-events-none flex items-center space-x-2">
             <span className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-[9px] uppercase tracking-[0.25em] text-zinc-300 font-mono">
               <Sparkles size={11} className="text-amber-400" />
-              <span>Real-time 3D WebGL</span>
+              <span>Real-time Three.js WebGL</span>
             </span>
           </div>
 
